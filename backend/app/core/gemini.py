@@ -9,7 +9,7 @@ def get_gemini_client():
         if not settings.gemini_api_key:
             raise RuntimeError("GEMINI_API_KEY is not set")
         from google import genai
-        _client = genai.Client(api_key=settings.gemini_api_key)
+        _client = genai.Client(api_key=settings.gemini_api_key, http_options={"api_version": "v1"})
     return _client
 
 
