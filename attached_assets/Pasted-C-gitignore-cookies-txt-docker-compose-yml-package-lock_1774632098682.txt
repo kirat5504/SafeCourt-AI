@@ -1,0 +1,139 @@
+C:.
+│   .gitignore
+│   cookies.txt
+│   docker-compose.yml
+│   package-lock.json
+│   package.json
+│   railway.json
+│   README.md
+│   session_response.json
+│   test.txt
+│
+├───backend
+│   │   .dockerignore
+│   │   Dockerfile
+│   │   requirements.txt
+│   │
+│   ├───alembic
+│   │   │   .gitkeep
+│   │   │
+│   │   └───versions
+│   │           .gitkeep
+│   │
+│   └───app
+│       │   main.py
+│       │
+│       ├───api
+│       │       auth.py
+│       │       debate.py
+│       │       health.py
+│       │       query.py
+│       │       sanitize.py
+│       │       sanitize_output_endpoints.py
+│       │       __init__.py
+│       │
+│       ├───core
+│       │       config.py
+│       │       database.py
+│       │       gemini.py
+│       │       gemini_rotator.py
+│       │       redis.py
+│       │       security.py
+│       │       __init__.py
+│       │
+│       ├───middleware
+│       │       .gitkeep
+│       │       rate_limit_middleware.py
+│       │       session_validator.py
+│       │       __init__.py
+│       │
+│       ├───models
+│       │       audit_log.py
+│       │       debate.py
+│       │       sanitized_output.py
+│       │       schemas.py
+│       │       session.py
+│       │       __init__.py
+│       │
+│       └───services
+│               audit_logger.py
+│               debate_service.py
+│               gemini_pdf_sanitizer.py
+│               gemini_text.py
+│               leak_scanner.py
+│               modal_client.py
+│               rate_limiter.py
+│               sanitized_output_service.py
+│               session_manager.py
+│               session_tracker.py
+│               __init__.py
+│
+├───frontend
+│   │   .env.development
+│   │   .env.production
+│   │   Dockerfile
+│   │   index.html
+│   │   nginx.conf
+│   │   package-lock.json
+│   │   package.json
+│   │   postcss.config.js
+│   │   tailwind.config.js
+│   │   tsconfig.json
+│   │   tsconfig.node.json
+│   │   vite.config.ts
+│   │
+│   └───src
+│       │   App.css
+│       │   App.tsx
+│       │   index.css
+│       │   main.tsx
+│       │   vite-env.d.ts
+│       │
+│       ├───components
+│       │   │   DebateResult.tsx
+│       │   │
+│       │   └───layout
+│       │           AppShell.tsx
+│       │           Header.tsx
+│       │           Navigation.tsx
+│       │
+│       ├───contexts
+│       │       SecurityContext.tsx
+│       │       SessionContext.tsx
+│       │
+│       ├───hooks
+│       │       useDetokenizer.ts
+│       │       useVault.ts
+│       │
+│       ├───pages
+│       │       Chat.tsx
+│       │       Dashboard.tsx
+│       │       Debate.tsx
+│       │       Documents.tsx
+│       │       Settings.tsx
+│       │       TestSecurityVaultPage.tsx
+│       │
+│       └───utils
+│               api.ts
+│               detokenizer.ts
+│               generateProcessingId.ts
+│               types.ts
+│               validation.ts
+│               Vault.ts
+│
+└───infrastructure
+    ├───database
+    │   │   init.sql
+    │   │
+    │   └───migrations
+    │           .gitkeep
+    │
+    ├───modal
+    │       .gitkeep
+    │       Dockerfile
+    │       requirements.txt
+    │       sanitizer.py
+    │
+    └───redis
+            .gitkeep
+            redis.conf
