@@ -78,12 +78,18 @@ def sanitize_pdf_with_gemini(pdf_bytes: bytes) -> tuple[bytes, dict[str, str], i
     start_time = time.time()
     gemini_calls = 0
 
+    if not pdf_bytes or len(pdf_bytes) < 4:
+        raise ValueError("PDF file is empty or too small to be valid")
+
+    if not pdf_bytes[:4] == b'%PDF':
+        raise ValueError("File does not appear to be a valid PDF (missing %PDF header). Please upload a proper PDF file.")
+
     try:
         import fitz
-        doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+        doc = fitz.open(stream=io.BytesIO(pdf_bytes), filetype="pdf")
         num_pages = len(doc)
     except Exception as e:
-        raise ValueError(f"Failed to open PDF: {e}")
+        raise ValueError(f"Failed to open PDF: {e}. The file may be corrupted or password-protected.")
 
     all_tokens: dict[str, str] = {}
 
