@@ -2,20 +2,18 @@ import io
 import json
 import logging
 import time
-from typing import Any
 from .tokenizer import tokenize_text
-from ..core.config import settings
-from ..core.gemini import get_gemini_client, is_gemini_available
+from ..core.claude import get_claude_client, is_claude_available, CLAUDE_MODEL, CLAUDE_MAX_TOKENS
 
 logger = logging.getLogger(__name__)
 
 
-def sanitize_text_with_gemini(text: str) -> tuple[str, dict[str, str]]:
-    if not is_gemini_available():
-        logger.warning("Gemini not available, falling back to regex tokenizer")
+def sanitize_text_with_claude(text: str) -> tuple[str, dict[str, str]]:
+    if not is_claude_available():
+        logger.warning("Claude not available, falling back to regex tokenizer")
         return tokenize_text(text)
 
-    client = get_gemini_client()
+    client = get_claude_client()
 
     prompt = f"""You are a PII (Personally Identifiable Information) detection and tokenization system.
 
@@ -42,9 +40,13 @@ Text to sanitize:
 {text}"""
 
     try:
-        response = client.generate_content(prompt)
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=CLAUDE_MAX_TOKENS,
+            messages=[{"role": "user", "content": prompt}],
+        )
 
-        response_text = response.text.strip()
+        response_text = response.content[0].text.strip()
 
         if response_text.startswith("```json"):
             response_text = response_text[7:]
@@ -58,7 +60,7 @@ Text to sanitize:
         sanitized_text = result.get("sanitized_text", text)
         token_map = result.get("token_map", {})
 
-        for token_id, original in token_map.items():
+        for token_id, original in list(token_map.items()):
             if not token_id.startswith("TOKEN_"):
                 new_token = "TOKEN_" + token_id.upper()
                 sanitized_text = sanitized_text.replace(token_id, new_token)
@@ -67,13 +69,14 @@ Text to sanitize:
         return sanitized_text, token_map
 
     except Exception as e:
-        logger.error(f"Gemini sanitization failed: {e}, falling back to regex")
+        logger.error(f"Claude sanitization failed: {e}, falling back to regex")
         return tokenize_text(text)
 
 
 def sanitize_pdf_with_gemini(pdf_bytes: bytes) -> tuple[bytes, dict[str, str], int, float, int]:
+    """Sanitizes a PDF using Claude (kept original function name for API compatibility)."""
     start_time = time.time()
-    gemini_calls = 0
+    claude_calls = 0
 
     if not pdf_bytes or len(pdf_bytes) < 4:
         raise ValueError("PDF file is empty or too small to be valid")
@@ -100,10 +103,10 @@ def sanitize_pdf_with_gemini(pdf_bytes: bytes) -> tuple[bytes, dict[str, str], i
             text = page.get_text()
 
             if text.strip():
-                sanitized_text, tokens = sanitize_text_with_gemini(text)
+                sanitized_text, tokens = sanitize_text_with_claude(text)
                 all_tokens.update(tokens)
-                if is_gemini_available():
-                    gemini_calls += 1
+                if is_claude_available():
+                    claude_calls += 1
 
                 for original, token in {v: k for k, v in tokens.items()}.items():
                     for rect in page.search_for(original):
@@ -123,4 +126,4 @@ def sanitize_pdf_with_gemini(pdf_bytes: bytes) -> tuple[bytes, dict[str, str], i
         sanitized_pdf_bytes = pdf_bytes
 
     processing_time = time.time() - start_time
-    return sanitized_pdf_bytes, all_tokens, num_pages, processing_time, gemini_calls
+    return sanitized_pdf_bytes, all_tokens, num_pages, processing_time, claude_calls

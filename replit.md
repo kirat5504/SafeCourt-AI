@@ -4,6 +4,34 @@
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
+## VaultSim Application
+
+Full-stack privacy tokenization platform.
+
+### Backend (Python/FastAPI)
+- **Location**: `backend/`
+- **Entry**: `backend/app/main.py`
+- **Port**: 8000
+- **AI Provider**: Anthropic Claude via Replit AI Integration proxy
+  - Model: `claude-haiku-4-5`
+  - Env vars auto-set: `AI_INTEGRATIONS_ANTHROPIC_BASE_URL`, `AI_INTEGRATIONS_ANTHROPIC_API_KEY`
+  - Core module: `backend/app/core/claude.py`
+- **Services**: `sanitizer.py` (PII tokenization), `debate.py` (security debate), `tokenizer.py` (regex fallback)
+- **Database**: PostgreSQL via SQLAlchemy (auto-initialized on startup)
+- **Cache**: Redis with fakeredis fallback
+- **PDF processing**: PyMuPDF (fitz)
+
+### Frontend (React + Vite + TypeScript + Tailwind CSS)
+- **Location**: `artifacts/vaultsim/`
+- **Port**: Uses `$PORT` env var
+- **Proxy**: `/api` → `http://localhost:8000` (FastAPI backend)
+
+### Routing (Replit proxy)
+- `/` → VaultSim frontend (port from $PORT)
+- `/node-api` → api-server (port 8080)
+
+
+
 ## Stack
 
 - **Monorepo tool**: pnpm workspaces

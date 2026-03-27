@@ -1,8 +1,5 @@
 import logging
-import json
-from typing import Any
-from ..core.config import settings
-from ..core.gemini import get_gemini_client, is_gemini_available
+from ..core.claude import get_claude_client, is_claude_available, CLAUDE_MODEL, CLAUDE_MAX_TOKENS
 
 logger = logging.getLogger(__name__)
 
@@ -26,67 +23,70 @@ Issue a brief ruling on which side made the stronger case.
 Speak in 3-4 sentences. Be impartial and authoritative."""
 
 
+def _ask(client, system: str, user: str) -> str:
+    response = client.messages.create(
+        model=CLAUDE_MODEL,
+        max_tokens=CLAUDE_MAX_TOKENS,
+        system=system,
+        messages=[{"role": "user", "content": user}],
+    )
+    return response.content[0].text.strip()
+
+
 def run_security_debate(session_id: str, context: str | None = None) -> tuple[list[dict], str | None]:
-    if not is_gemini_available():
+    if not is_claude_available():
         transcript = [
             {
                 "agent": "SYSTEM",
-                "text": "Gemini API not configured. Please set GEMINI_API_KEY to run the security debate."
+                "text": "Claude API not configured. Please check Replit Anthropic integration setup."
             }
         ]
         return transcript, None
 
-    client = get_gemini_client()
+    client = get_claude_client()
     transcript = []
 
     context_note = f"\nContext about the session being evaluated: {context}" if context else ""
 
-    defense_prompt = f"""You are in a security debate about a tokenization system.
-{DEFENSE_SYSTEM_PROMPT}
+    defense_user = f"""You are in a security debate about a tokenization system.
 {context_note}
 Opening argument: Why is this tokenization system secure?"""
 
     try:
-        response = client.generate_content(defense_prompt)
-        defense_arg = response.text.strip()
+        defense_arg = _ask(client, DEFENSE_SYSTEM_PROMPT, defense_user)
         transcript.append({"agent": "DefenseLawyer", "text": defense_arg})
     except Exception as e:
         logger.error(f"Defense argument failed: {e}")
         transcript.append({"agent": "DefenseLawyer", "text": "Defense argument unavailable due to API error."})
         defense_arg = "The system uses strong encryption and tokenization."
 
-    prosecution_prompt = f"""You are in a security debate about a tokenization system.
-{PROSECUTION_SYSTEM_PROMPT}
+    prosecution_user = f"""You are in a security debate about a tokenization system.
 {context_note}
 The defense just said: "{defense_arg}"
 Respond with your counter-argument: What are the vulnerabilities?"""
 
     try:
-        response = client.generate_content(prosecution_prompt)
-        prosecution_arg = response.text.strip()
+        prosecution_arg = _ask(client, PROSECUTION_SYSTEM_PROMPT, prosecution_user)
         transcript.append({"agent": "ProsecutionLawyer", "text": prosecution_arg})
     except Exception as e:
         logger.error(f"Prosecution argument failed: {e}")
         transcript.append({"agent": "ProsecutionLawyer", "text": "Prosecution argument unavailable due to API error."})
         prosecution_arg = "The system may have vulnerabilities in key management."
 
-    rebuttal_prompt = f"""You are in a security debate about a tokenization system.
-{DEFENSE_SYSTEM_PROMPT}
+    rebuttal_user = f"""You are in a security debate about a tokenization system.
 {context_note}
 Prosecution said: "{prosecution_arg}"
 Provide a rebuttal defending the system's security."""
 
     try:
-        response = client.generate_content(rebuttal_prompt)
-        rebuttal = response.text.strip()
+        rebuttal = _ask(client, DEFENSE_SYSTEM_PROMPT, rebuttal_user)
         transcript.append({"agent": "DefenseLawyer", "text": rebuttal})
     except Exception as e:
         logger.error(f"Rebuttal failed: {e}")
         transcript.append({"agent": "DefenseLawyer", "text": "Rebuttal unavailable due to API error."})
         rebuttal = defense_arg
 
-    judge_prompt = f"""You are the judge in a security debate about a tokenization system.
-{JUDGE_SYSTEM_PROMPT}
+    judge_user = f"""You are the judge in a security debate about a tokenization system.
 {context_note}
 Defense argued: "{defense_arg}"
 Prosecution argued: "{prosecution_arg}"
@@ -94,15 +94,11 @@ Defense rebuttal: "{rebuttal}"
 Issue your ruling:"""
 
     try:
-        response = client.generate_content(judge_prompt)
-        ruling = response.text.strip()
+        ruling = _ask(client, JUDGE_SYSTEM_PROMPT, judge_user)
         transcript.append({"agent": "Judge", "text": ruling})
     except Exception as e:
         logger.error(f"Judge ruling failed: {e}")
         transcript.append({"agent": "Judge", "text": "Judgment unavailable due to API error."})
 
-    masked_content = None
-    if context:
-        masked_content = context
-
+    masked_content = context if context else None
     return transcript, masked_content

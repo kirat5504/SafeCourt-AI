@@ -7,12 +7,11 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session as DBSession
 from typing import Optional, List
 from ..core.database import get_db
-from ..core.config import settings
 from ..core.security import validate_session_id
-from ..core.gemini import get_gemini_client, is_gemini_available
+from ..core.claude import get_claude_client, is_claude_available, CLAUDE_MODEL, CLAUDE_MAX_TOKENS
 from ..models.session import Session as SessionModel
 from ..models.sanitized_output import SanitizedOutput
-from ..services.sanitizer import sanitize_text_with_gemini
+from ..services.sanitizer import sanitize_text_with_claude
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -52,16 +51,16 @@ async def send_chat(
     if not x_processing_id:
         x_processing_id = str(uuid.uuid4())
 
-    if not is_gemini_available():
+    if not is_claude_available():
         return {
-            "response": "Gemini API not configured. Please set the GEMINI_API_KEY environment variable.",
-            "sanitized_response": "Gemini API not configured. Please set the GEMINI_API_KEY environment variable.",
+            "response": "Claude API not configured. Please check Replit Anthropic integration setup.",
+            "sanitized_response": "Claude API not configured. Please check Replit Anthropic integration setup.",
             "tokens": {},
             "engine": "none",
         }
 
     try:
-        client = get_gemini_client()
+        client = get_claude_client()
 
         previous_outputs = db.query(SanitizedOutput).filter(
             SanitizedOutput.session_id == uuid.UUID(x_session_id)
@@ -71,7 +70,7 @@ async def send_chat(
         if previous_outputs:
             context_hint = "\n\nNote: This user has previously processed sensitive documents. Respond helpfully about privacy and security topics."
 
-        sanitized_user_msg, user_tokens = sanitize_text_with_gemini(request_body.message)
+        sanitized_user_msg, user_tokens = sanitize_text_with_claude(request_body.message)
 
         system_prompt = f"""You are a privacy-aware AI assistant for VaultSim, a tokenization security platform.
 You help users understand:
@@ -82,21 +81,23 @@ You help users understand:
 
 Be helpful, concise, and security-focused.{context_hint}"""
 
-        history_text = ""
+        messages = []
         if request_body.conversation_history:
             for msg in request_body.conversation_history[-10:]:
-                role_label = "User" if msg.role == "user" else "Assistant"
-                history_text += f"\n{role_label}: {msg.content}"
+                role = "user" if msg.role == "user" else "assistant"
+                messages.append({"role": role, "content": msg.content})
 
-        full_prompt = f"{system_prompt}\n{history_text}\nUser: {sanitized_user_msg}\nAssistant:"
+        messages.append({"role": "user", "content": sanitized_user_msg})
 
-        response = client.models.generate_content(
-            model=settings.gemini_model,
-            contents=full_prompt,
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=CLAUDE_MAX_TOKENS,
+            system=system_prompt,
+            messages=messages,
         )
 
-        ai_response = response.text.strip()
-        sanitized_response, response_tokens = sanitize_text_with_gemini(ai_response)
+        ai_response = response.content[0].text.strip()
+        sanitized_response, response_tokens = sanitize_text_with_claude(ai_response)
         all_tokens = {**user_tokens, **response_tokens}
 
         if all_tokens:
@@ -111,7 +112,7 @@ Be helpful, concise, and security-focused.{context_hint}"""
                 processing_id=proc_uuid,
                 input_type="text",
                 tokenized_content=json.dumps(all_tokens),
-                engine="gemini",
+                engine="claude",
             )
             db.add(output)
 
@@ -122,7 +123,7 @@ Be helpful, concise, and security-focused.{context_hint}"""
             "response": ai_response,
             "sanitized_response": sanitized_response,
             "tokens": all_tokens,
-            "engine": "gemini",
+            "engine": "claude",
         }
 
     except HTTPException:

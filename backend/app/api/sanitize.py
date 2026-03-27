@@ -11,7 +11,7 @@ from ..core.config import settings
 from ..core.security import validate_session_id
 from ..models.session import Session as SessionModel
 from ..models.sanitized_output import SanitizedOutput
-from ..services.sanitizer import sanitize_text_with_gemini, sanitize_pdf_with_gemini
+from ..services.sanitizer import sanitize_text_with_claude, sanitize_pdf_with_gemini
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ async def sanitize_text(
         x_processing_id = str(uuid.uuid4())
 
     try:
-        sanitized_text, tokens = sanitize_text_with_gemini(request_body.text)
+        sanitized_text, tokens = sanitize_text_with_claude(request_body.text)
 
         if tokens:
             output = SanitizedOutput(
@@ -61,7 +61,7 @@ async def sanitize_text(
                 processing_id=uuid.UUID(x_processing_id) if validate_session_id(x_processing_id) else uuid.uuid4(),
                 input_type="text",
                 tokenized_content=json.dumps(tokens),
-                engine="gemini",
+                engine="claude",
             )
             db.add(output)
             db.commit()
@@ -72,7 +72,7 @@ async def sanitize_text(
         return {
             "sanitized_text": sanitized_text,
             "tokens": tokens,
-            "engine": "gemini",
+            "engine": "claude",
         }
     except HTTPException:
         raise
@@ -103,7 +103,7 @@ async def sanitize_pdf(
         x_processing_id = str(uuid.uuid4())
 
     try:
-        sanitized_pdf, tokens, pages, processing_time, gemini_calls = sanitize_pdf_with_gemini(pdf_bytes)
+        sanitized_pdf, tokens, pages, processing_time, claude_calls = sanitize_pdf_with_gemini(pdf_bytes)
 
         if tokens:
             try:
@@ -117,7 +117,7 @@ async def sanitize_pdf(
                 processing_id=proc_uuid,
                 input_type="pdf",
                 tokenized_content=json.dumps(tokens),
-                engine="gemini",
+                engine="claude",
             )
             db.add(output)
             db.commit()
@@ -134,7 +134,7 @@ async def sanitize_pdf(
                 "X-Tokens": ",".join(token_ids),
                 "X-Pages": str(pages),
                 "X-Processing-Time": str(round(processing_time, 3)),
-                "X-Gemini-Calls": str(gemini_calls),
+                "X-Gemini-Calls": str(claude_calls),
                 "X-Processing-ID": x_processing_id,
                 "Content-Disposition": f"inline; filename=sanitized_{file.filename}",
                 "Access-Control-Expose-Headers": "X-Tokens,X-Pages,X-Processing-Time,X-Gemini-Calls,X-Processing-ID",
