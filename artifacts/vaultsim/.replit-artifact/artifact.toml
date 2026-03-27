@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "VaultSim"
+version = "1.0.0"
+id = "artifacts/vaultsim"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18968
+
+[services.development]
+run = "pnpm --filter @workspace/vaultsim run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/vaultsim", "run", "build" ]
+publicDir = "artifacts/vaultsim/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18968"
+BASE_PATH = "/"
