@@ -5,7 +5,6 @@ import { AppShell } from './components/layout/AppShell';
 
 import { Dashboard } from './pages/Dashboard';
 import { Documents } from './pages/Documents';
-import { Chat } from './pages/Chat';
 import { Settings } from './pages/Settings';
 import { Debate } from './pages/Debate';
 import { TestSecurityVaultPage } from './pages/TestSecurityVaultPage';
@@ -19,7 +18,6 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/documents" element={<Documents />} />
-              <Route path="/chat" element={<Chat />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/debate" element={<Debate />} />
               <Route path="/test" element={<TestSecurityVaultPage />} />

@@ -13,5 +13,6 @@ class SanitizedOutput(Base):
     processing_id = Column(UUID(as_uuid=True), nullable=False)
     input_type = Column(String(10), nullable=False)
     tokenized_content = Column(Text, nullable=False)
-    engine = Column(String(50), nullable=False, default="gemini")
+    sanitized_text = Column(Text, nullable=True)
+    engine = Column(String(50), nullable=False, default="claude")
     created_at = Column(DateTime, nullable=False, default=func.now())

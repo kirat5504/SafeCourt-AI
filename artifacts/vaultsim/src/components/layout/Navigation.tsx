@@ -11,7 +11,6 @@ interface NavigationItem {
 const navigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/', icon: '📊', requiresAuth: true },
   { name: 'Documents', href: '/documents', icon: '📄', requiresAuth: true },
-  { name: 'Chat', href: '/chat', icon: '💬', requiresAuth: true },
   { name: 'Debate', href: '/debate', icon: '⚖️', requiresAuth: true },
   { name: 'Settings', href: '/settings', icon: '⚙️', requiresAuth: true },
   { name: 'Test Lab', href: '/test', icon: '🧪', requiresAuth: false },

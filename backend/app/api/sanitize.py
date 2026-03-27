@@ -61,6 +61,7 @@ async def sanitize_text(
                 processing_id=uuid.UUID(x_processing_id) if validate_session_id(x_processing_id) else uuid.uuid4(),
                 input_type="text",
                 tokenized_content=json.dumps(tokens),
+                sanitized_text=sanitized_text,
                 engine="claude",
             )
             db.add(output)
@@ -103,7 +104,7 @@ async def sanitize_pdf(
         x_processing_id = str(uuid.uuid4())
 
     try:
-        sanitized_pdf, tokens, pages, processing_time, claude_calls = sanitize_pdf_with_gemini(pdf_bytes)
+        sanitized_pdf, tokens, pages, processing_time, claude_calls, extracted_text = sanitize_pdf_with_gemini(pdf_bytes)
 
         if tokens:
             try:
@@ -117,6 +118,7 @@ async def sanitize_pdf(
                 processing_id=proc_uuid,
                 input_type="pdf",
                 tokenized_content=json.dumps(tokens),
+                sanitized_text=extracted_text,
                 engine="claude",
             )
             db.add(output)

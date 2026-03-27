@@ -73,8 +73,11 @@ Text to sanitize:
         return tokenize_text(text)
 
 
-def sanitize_pdf_with_gemini(pdf_bytes: bytes) -> tuple[bytes, dict[str, str], int, float, int]:
-    """Sanitizes a PDF using Claude (kept original function name for API compatibility)."""
+def sanitize_pdf_with_gemini(pdf_bytes: bytes) -> tuple[bytes, dict[str, str], int, float, int, str]:
+    """
+    Sanitizes a PDF using Claude.
+    Returns: (sanitized_pdf_bytes, tokens, num_pages, processing_time, claude_calls, extracted_sanitized_text)
+    """
     start_time = time.time()
     claude_calls = 0
 
@@ -92,6 +95,7 @@ def sanitize_pdf_with_gemini(pdf_bytes: bytes) -> tuple[bytes, dict[str, str], i
         raise ValueError(f"Failed to open PDF: {e}. The file may be corrupted or password-protected.")
 
     all_tokens: dict[str, str] = {}
+    all_sanitized_text_parts: list[str] = []
 
     try:
         import fitz
@@ -105,6 +109,7 @@ def sanitize_pdf_with_gemini(pdf_bytes: bytes) -> tuple[bytes, dict[str, str], i
             if text.strip():
                 sanitized_text, tokens = sanitize_text_with_claude(text)
                 all_tokens.update(tokens)
+                all_sanitized_text_parts.append(sanitized_text)
                 if is_claude_available():
                     claude_calls += 1
 
@@ -125,5 +130,6 @@ def sanitize_pdf_with_gemini(pdf_bytes: bytes) -> tuple[bytes, dict[str, str], i
         doc.close()
         sanitized_pdf_bytes = pdf_bytes
 
+    extracted_sanitized_text = "\n\n".join(all_sanitized_text_parts)
     processing_time = time.time() - start_time
-    return sanitized_pdf_bytes, all_tokens, num_pages, processing_time, claude_calls
+    return sanitized_pdf_bytes, all_tokens, num_pages, processing_time, claude_calls, extracted_sanitized_text

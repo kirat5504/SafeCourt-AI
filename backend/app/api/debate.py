@@ -30,24 +30,41 @@ async def run_debate(
     if not session:
         raise HTTPException(status_code=401, detail="Invalid or expired session")
 
-    recent_outputs = db.query(SanitizedOutput).filter(
-        SanitizedOutput.session_id == uuid.UUID(session_id)
-    ).order_by(SanitizedOutput.created_at.desc()).limit(3).all()
+    recent_output = db.query(SanitizedOutput).filter(
+        SanitizedOutput.session_id == uuid.UUID(session_id),
+        SanitizedOutput.sanitized_text.isnot(None),
+    ).order_by(SanitizedOutput.created_at.desc()).first()
 
-    context = None
-    if recent_outputs:
-        token_counts = []
-        for output in recent_outputs:
-            try:
-                tokens = json.loads(output.tokenized_content)
-                token_counts.append(f"{output.input_type}: {len(tokens)} tokens")
-            except Exception:
-                pass
-        if token_counts:
-            context = f"Session has processed: {', '.join(token_counts)}"
+    sanitized_text = None
+    if recent_output and recent_output.sanitized_text:
+        sanitized_text = recent_output.sanitized_text
+
+    recent_debates = db.query(Debate).filter(
+        Debate.session_id == uuid.UUID(session_id)
+    ).order_by(Debate.created_at.desc()).limit(2).all()
+
+    debate_history: list[dict] = []
+    for d in reversed(recent_debates):
+        debate_history.extend(d.transcript or [])
+
+    if not sanitized_text:
+        return {
+            "session_id": session_id,
+            "transcript": [
+                {
+                    "agent": "SYSTEM",
+                    "text": "No case document found for this session. Please upload a case document via 'Upload Case' first."
+                }
+            ],
+            "masked_content": None,
+        }
 
     try:
-        transcript, masked_content = run_security_debate(session_id, context)
+        transcript, masked_content = run_security_debate(
+            session_id=session_id,
+            sanitized_text=sanitized_text,
+            debate_history=debate_history,
+        )
 
         debate = Debate(
             id=uuid.uuid4(),

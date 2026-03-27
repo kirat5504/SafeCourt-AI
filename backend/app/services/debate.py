@@ -4,23 +4,23 @@ from ..core.claude import get_claude_client, is_claude_available, CLAUDE_MODEL, 
 logger = logging.getLogger(__name__)
 
 
-DEFENSE_SYSTEM_PROMPT = """You are the Defense Lawyer AI in a security debate.
-Your role: Argue that the tokenized data system is SECURE and cannot be exploited.
-You defend the privacy-preserving properties of the tokenization approach.
-Be specific about WHY the system is secure.
-Speak in 2-3 sentences. Be confident and technical."""
+DEFENSE_SYSTEM_PROMPT = """You are the Defense Counsel in a case review debate.
+Your role: Based ONLY on the sanitized case document provided, argue IN FAVOR of the claims, 
+position, or findings presented in the document. Support the position using specific facts 
+and evidence referenced in the document.
+Speak in 2-3 confident, technical sentences. Reference specific details from the case."""
 
-PROSECUTION_SYSTEM_PROMPT = """You are the Prosecution Lawyer AI in a security debate.
-Your role: Argue that the tokenized data system has VULNERABILITIES that could be exploited.
-You identify weaknesses in the privacy approach.
-Be specific about potential attack vectors or information leakage.
-Speak in 2-3 sentences. Be aggressive and technical."""
+PROSECUTION_SYSTEM_PROMPT = """You are the Prosecution Counsel in a case review debate.
+Your role: Based ONLY on the sanitized case document provided, argue AGAINST the claims, 
+position, or findings. Challenge the evidence, identify weaknesses, contradictions, or 
+missing information in the document.
+Speak in 2-3 assertive sentences. Be specific about what is weak or missing."""
 
-JUDGE_SYSTEM_PROMPT = """You are the Judge AI in a security debate.
-Your role: Evaluate the arguments from both Defense and Prosecution.
-Give a fair, technical assessment of the security properties.
-Issue a brief ruling on which side made the stronger case.
-Speak in 3-4 sentences. Be impartial and authoritative."""
+JUDGE_SYSTEM_PROMPT = """You are the presiding Judge in a case review debate.
+Your role: After hearing Defense and Prosecution arguments, issue a final balanced verdict.
+Assess which side made the stronger case based on the evidence in the document.
+State clearly which side prevails and why, referencing specific arguments made.
+Speak in 3-4 authoritative sentences."""
 
 
 def _ask(client, system: str, user: str) -> str:
@@ -33,7 +33,19 @@ def _ask(client, system: str, user: str) -> str:
     return response.content[0].text.strip()
 
 
-def run_security_debate(session_id: str, context: str | None = None) -> tuple[list[dict], str | None]:
+def run_security_debate(
+    session_id: str,
+    context: str | None = None,
+    sanitized_text: str | None = None,
+    debate_history: list[dict] | None = None,
+) -> tuple[list[dict], str | None]:
+    """
+    Run a 3-agent debate about the uploaded case.
+    - sanitized_text: the full sanitized text of the uploaded document
+    - debate_history: previous debate exchanges for this session
+    - context: fallback metadata if no sanitized_text available
+    """
+
     if not is_claude_available():
         transcript = [
             {
@@ -43,62 +55,86 @@ def run_security_debate(session_id: str, context: str | None = None) -> tuple[li
         ]
         return transcript, None
 
+    if not sanitized_text:
+        transcript = [
+            {
+                "agent": "SYSTEM",
+                "text": "No case document found. Please upload a case document first to start the debate."
+            }
+        ]
+        return transcript, None
+
     client = get_claude_client()
     transcript = []
 
-    context_note = f"\nContext about the session being evaluated: {context}" if context else ""
+    history_section = ""
+    if debate_history:
+        lines = [f"{e['agent']}: {e['text']}" for e in debate_history[-6:]]
+        history_section = "\n\nPrevious debate context:\n" + "\n".join(lines)
 
-    defense_user = f"""You are in a security debate about a tokenization system.
-{context_note}
-Opening argument: Why is this tokenization system secure?"""
+    case_section = f"\n\n--- CASE DOCUMENT (SANITIZED) ---\n{sanitized_text}\n--- END OF CASE DOCUMENT ---"
+
+    defense_prompt = (
+        f"You are reviewing the following sanitized case document."
+        f"{case_section}"
+        f"{history_section}"
+        f"\n\nYour task: Argue IN FAVOR of the claims/position in this document."
+    )
 
     try:
-        defense_arg = _ask(client, DEFENSE_SYSTEM_PROMPT, defense_user)
-        transcript.append({"agent": "DefenseLawyer", "text": defense_arg})
+        defense_arg = _ask(client, DEFENSE_SYSTEM_PROMPT, defense_prompt)
+        transcript.append({"agent": "DefenseCounsel", "text": defense_arg})
     except Exception as e:
         logger.error(f"Defense argument failed: {e}")
-        transcript.append({"agent": "DefenseLawyer", "text": "Defense argument unavailable due to API error."})
-        defense_arg = "The system uses strong encryption and tokenization."
+        transcript.append({"agent": "DefenseCounsel", "text": "Defense argument unavailable due to API error."})
+        defense_arg = "The case document supports the claims made."
 
-    prosecution_user = f"""You are in a security debate about a tokenization system.
-{context_note}
-The defense just said: "{defense_arg}"
-Respond with your counter-argument: What are the vulnerabilities?"""
+    prosecution_prompt = (
+        f"You are reviewing the following sanitized case document."
+        f"{case_section}"
+        f"{history_section}"
+        f"\n\nDefense Counsel just argued: \"{defense_arg}\""
+        f"\n\nYour task: Argue AGAINST the claims/position in this document. Challenge the defense."
+    )
 
     try:
-        prosecution_arg = _ask(client, PROSECUTION_SYSTEM_PROMPT, prosecution_user)
-        transcript.append({"agent": "ProsecutionLawyer", "text": prosecution_arg})
+        prosecution_arg = _ask(client, PROSECUTION_SYSTEM_PROMPT, prosecution_prompt)
+        transcript.append({"agent": "ProsecutionCounsel", "text": prosecution_arg})
     except Exception as e:
         logger.error(f"Prosecution argument failed: {e}")
-        transcript.append({"agent": "ProsecutionLawyer", "text": "Prosecution argument unavailable due to API error."})
-        prosecution_arg = "The system may have vulnerabilities in key management."
+        transcript.append({"agent": "ProsecutionCounsel", "text": "Prosecution argument unavailable due to API error."})
+        prosecution_arg = "The case document has significant weaknesses."
 
-    rebuttal_user = f"""You are in a security debate about a tokenization system.
-{context_note}
-Prosecution said: "{prosecution_arg}"
-Provide a rebuttal defending the system's security."""
+    rebuttal_prompt = (
+        f"You are reviewing the following sanitized case document."
+        f"{case_section}"
+        f"{history_section}"
+        f"\n\nProsecution Counsel argued: \"{prosecution_arg}\""
+        f"\n\nYour task: Rebut the prosecution. Defend the document's position with additional reasoning."
+    )
 
     try:
-        rebuttal = _ask(client, DEFENSE_SYSTEM_PROMPT, rebuttal_user)
-        transcript.append({"agent": "DefenseLawyer", "text": rebuttal})
+        rebuttal = _ask(client, DEFENSE_SYSTEM_PROMPT, rebuttal_prompt)
+        transcript.append({"agent": "DefenseCounsel", "text": rebuttal})
     except Exception as e:
         logger.error(f"Rebuttal failed: {e}")
-        transcript.append({"agent": "DefenseLawyer", "text": "Rebuttal unavailable due to API error."})
+        transcript.append({"agent": "DefenseCounsel", "text": "Rebuttal unavailable due to API error."})
         rebuttal = defense_arg
 
-    judge_user = f"""You are the judge in a security debate about a tokenization system.
-{context_note}
-Defense argued: "{defense_arg}"
-Prosecution argued: "{prosecution_arg}"
-Defense rebuttal: "{rebuttal}"
-Issue your ruling:"""
+    judge_prompt = (
+        f"You have presided over a debate about the following sanitized case document."
+        f"{case_section}"
+        f"\n\nDefense argued: \"{defense_arg}\""
+        f"\nProsecution argued: \"{prosecution_arg}\""
+        f"\nDefense rebuttal: \"{rebuttal}\""
+        f"\n\nIssue your final verdict:"
+    )
 
     try:
-        ruling = _ask(client, JUDGE_SYSTEM_PROMPT, judge_user)
+        ruling = _ask(client, JUDGE_SYSTEM_PROMPT, judge_prompt)
         transcript.append({"agent": "Judge", "text": ruling})
     except Exception as e:
         logger.error(f"Judge ruling failed: {e}")
-        transcript.append({"agent": "Judge", "text": "Judgment unavailable due to API error."})
+        transcript.append({"agent": "Judge", "text": "Verdict unavailable due to API error."})
 
-    masked_content = context if context else None
-    return transcript, masked_content
+    return transcript, sanitized_text
