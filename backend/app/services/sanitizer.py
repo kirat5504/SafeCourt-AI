@@ -42,10 +42,7 @@ Text to sanitize:
 {text}"""
 
     try:
-        response = client.models.generate_content(
-            model=settings.gemini_model,
-            contents=prompt,
-        )
+        response = client.generate_content(prompt)
 
         response_text = response.text.strip()
 

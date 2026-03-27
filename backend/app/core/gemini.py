@@ -1,16 +1,17 @@
+import google.generativeai as genai
 from .config import settings
 
-_client = None
+_model = None
 
 
 def get_gemini_client():
-    global _client
-    if _client is None:
+    global _model
+    if _model is None:
         if not settings.gemini_api_key:
             raise RuntimeError("GEMINI_API_KEY is not set")
-        from google import genai
-        _client = genai.Client(api_key=settings.gemini_api_key, http_options={"api_version": "v1"})
-    return _client
+        genai.configure(api_key=settings.gemini_api_key)
+        _model = genai.GenerativeModel(settings.gemini_model)
+    return _model
 
 
 def is_gemini_available() -> bool:

@@ -47,10 +47,7 @@ def run_security_debate(session_id: str, context: str | None = None) -> tuple[li
 Opening argument: Why is this tokenization system secure?"""
 
     try:
-        response = client.models.generate_content(
-            model=settings.gemini_model,
-            contents=defense_prompt,
-        )
+        response = client.generate_content(defense_prompt)
         defense_arg = response.text.strip()
         transcript.append({"agent": "DefenseLawyer", "text": defense_arg})
     except Exception as e:
@@ -65,10 +62,7 @@ The defense just said: "{defense_arg}"
 Respond with your counter-argument: What are the vulnerabilities?"""
 
     try:
-        response = client.models.generate_content(
-            model=settings.gemini_model,
-            contents=prosecution_prompt,
-        )
+        response = client.generate_content(prosecution_prompt)
         prosecution_arg = response.text.strip()
         transcript.append({"agent": "ProsecutionLawyer", "text": prosecution_arg})
     except Exception as e:
@@ -83,10 +77,7 @@ Prosecution said: "{prosecution_arg}"
 Provide a rebuttal defending the system's security."""
 
     try:
-        response = client.models.generate_content(
-            model=settings.gemini_model,
-            contents=rebuttal_prompt,
-        )
+        response = client.generate_content(rebuttal_prompt)
         rebuttal = response.text.strip()
         transcript.append({"agent": "DefenseLawyer", "text": rebuttal})
     except Exception as e:
@@ -103,10 +94,7 @@ Defense rebuttal: "{rebuttal}"
 Issue your ruling:"""
 
     try:
-        response = client.models.generate_content(
-            model=settings.gemini_model,
-            contents=judge_prompt,
-        )
+        response = client.generate_content(judge_prompt)
         ruling = response.text.strip()
         transcript.append({"agent": "Judge", "text": ruling})
     except Exception as e:
