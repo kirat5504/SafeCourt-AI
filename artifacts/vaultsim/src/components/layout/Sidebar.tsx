@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSession } from '../../contexts/SessionContext';
 import { getApiClient, VerdictItem } from '../../utils/api';
+import { formatRelativeTime } from '../../utils/formatTime';
 
 const SAVE_PREF_KEY = 'sc_save_verdicts';
 
 export function Sidebar() {
   const { session, initializeSession, clearSession, isSessionValid } = useSession();
+  const navigate = useNavigate();
   const [creating, setCreating] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
   const [verdicts, setVerdicts] = useState<VerdictItem[]>([]);
@@ -20,7 +23,7 @@ export function Sidebar() {
   const fetchVerdicts = useCallback(async () => {
     setLoadingVerdicts(true);
     try {
-      const res = await apiClient.getVerdicts();
+      const res = await apiClient.getVerdicts(5);
       setVerdicts(res.verdicts);
     } catch {
     } finally {
@@ -54,16 +57,6 @@ export function Sidebar() {
       setSessionError('Failed to create session');
     } finally {
       setCreating(false);
-    }
-  };
-
-  const formatTime = (iso: string) => {
-    try {
-      return new Date(iso).toLocaleTimeString('en-US', {
-        hour: '2-digit', minute: '2-digit', hour12: true,
-      });
-    } catch {
-      return '';
     }
   };
 
@@ -105,43 +98,60 @@ export function Sidebar() {
               verdicts.map(v => (
                 <div
                   key={v.id}
-                  className="rounded px-2 py-2 transition-colors"
+                  onClick={() => navigate(`/history/${v.id}`)}
+                  className="rounded px-2 py-2 transition-all"
                   style={{
                     background: 'rgba(255,255,255,0.03)',
                     border: '1px solid rgba(255,255,255,0.05)',
-                    cursor: 'default',
+                    cursor: 'pointer',
                   }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.07)';
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.background = 'rgba(200,146,58,0.08)';
+                    el.style.borderColor = 'rgba(200,146,58,0.2)';
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)';
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.background = 'rgba(255,255,255,0.03)';
+                    el.style.borderColor = 'rgba(255,255,255,0.05)';
                   }}
                 >
                   <p
-                    className="text-xs leading-snug mb-0.5"
                     style={{
                       color: '#cccccc',
+                      fontSize: '10px',
+                      lineHeight: '1.5',
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
-                      fontSize: '10px',
-                      lineHeight: '1.5',
+                      marginBottom: 2,
                     }}
                   >
                     {v.preview}
                   </p>
                   <p style={{ color: '#444444', fontSize: '9px', letterSpacing: '0.05em' }}>
-                    {formatTime(v.created_at)}
+                    {formatRelativeTime(v.created_at)}
                   </p>
                 </div>
               ))
             )}
           </div>
 
+          {verdicts.length > 0 && (
+            <button
+              onClick={() => navigate('/history')}
+              className="mt-2 w-full text-left py-1 px-2 rounded text-xs transition-colors"
+              style={{ color: '#c8923a', letterSpacing: '0.05em', fontSize: '10px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#e0a84a')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#c8923a')}
+            >
+              View All →
+            </button>
+          )}
+
           <div
-            className="flex items-center justify-between mt-3 px-2 py-2 rounded"
+            className="flex items-center justify-between mt-2 px-2 py-2 rounded"
             style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
           >
             <span style={{ color: '#666666', fontSize: '9px', letterSpacing: '0.08em', fontWeight: 600 }}>
@@ -187,11 +197,7 @@ export function Sidebar() {
             <button
               onClick={clearSession}
               className="w-full py-2.5 rounded text-sm font-bold tracking-widest transition-colors"
-              style={{
-                background: 'white',
-                color: '#111111',
-                letterSpacing: '0.12em',
-              }}
+              style={{ background: 'white', color: '#111111', letterSpacing: '0.12em' }}
             >
               END SESSION
             </button>
@@ -200,11 +206,7 @@ export function Sidebar() {
               onClick={handleCreateSession}
               disabled={creating}
               className="w-full py-2.5 rounded text-sm font-bold tracking-widest transition-opacity disabled:opacity-50"
-              style={{
-                background: 'white',
-                color: '#111111',
-                letterSpacing: '0.12em',
-              }}
+              style={{ background: 'white', color: '#111111', letterSpacing: '0.12em' }}
             >
               {creating ? 'CREATING...' : 'CREATE SESSION'}
             </button>

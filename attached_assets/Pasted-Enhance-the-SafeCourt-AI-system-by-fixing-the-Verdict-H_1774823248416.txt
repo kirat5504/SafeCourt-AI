@@ -1,0 +1,167 @@
+Enhance the **SafeCourt AI** system by fixing the Verdict History feature and improving its UX with a dedicated History page.
+
+---
+
+# 🎯 GOALS
+
+1. Fix incorrect timestamp display in verdict history
+2. Enable proper navigation when clicking a verdict
+3. Create a clean, dedicated **History page/tab**
+4. Improve overall UX and structure
+
+---
+
+# 🔴 ISSUE 1: INCORRECT TIMESTAMPS
+
+## Problem:
+
+* Verdict history shows incorrect or inconsistent time values
+
+## Fix:
+
+### Backend:
+
+* Ensure `created_at` is stored correctly using UTC
+
+Example:
+
+* Use `datetime.utcnow()` (Python)
+* Store in ISO format
+
+---
+
+### Frontend:
+
+1. Convert timestamp to local time before displaying
+
+2. Display in readable format:
+
+* "2 mins ago"
+* "10 mins ago"
+* "Yesterday"
+* OR exact format: "Mar 30, 10:45 PM"
+
+3. Use a helper function:
+
+Example:
+
+* `formatRelativeTime(timestamp)`
+
+---
+
+# 🟣 ISSUE 2: CLICKING VERDICT DOES NOTHING
+
+## Problem:
+
+* Clicking a verdict in sidebar does not navigate anywhere
+
+## Fix:
+
+1. Add click handler on each verdict item
+
+2. On click:
+
+* Navigate to:
+  `/history/:id`
+
+---
+
+# 🟢 NEW FEATURE: HISTORY PAGE (IMPORTANT)
+
+## Create a new route:
+
+`/history`
+
+---
+
+## Page Purpose:
+
+* Display all saved verdicts cleanly
+* Improve UX and avoid cluttered sidebar
+
+---
+
+## 📄 History Page UI
+
+### Layout:
+
+* Title:
+  **"Verdict History"**
+
+* List of verdict cards:
+
+Each card contains:
+
+* Short preview of verdict (1–2 lines)
+* Timestamp
+* Optional session ID
+
+---
+
+## 📄 Individual Verdict Page
+
+Route:
+`/history/:id`
+
+Display:
+
+* Full final verdict
+* Timestamp
+* Optional metadata
+
+---
+
+# ⚛️ FRONTEND STRUCTURE
+
+Create:
+
+* `History.tsx` → list page
+* `VerdictDetail.tsx` → individual verdict
+
+Update router:
+
+* `/history`
+* `/history/:id`
+
+---
+
+# 🧭 SIDEBAR CHANGES
+
+1. Add new navigation item:
+   **"HISTORY"**
+
+2. Sidebar should:
+
+* Show only recent 3–5 verdicts (preview)
+* Add "View All →" button → navigates to `/history`
+
+---
+
+# 🎨 UX IMPROVEMENTS
+
+* Highlight clickable verdicts (hover effect)
+* Add cursor pointer
+* Add subtle card UI
+* Maintain clean spacing
+
+---
+
+# 🚨 IMPORTANT CONSTRAINTS
+
+* Do NOT clutter sidebar with full history
+* Do NOT break existing layout
+* Keep UI minimal and professional
+* Ensure smooth navigation
+
+---
+
+# 🎯 END GOAL
+
+* Accurate timestamps
+* Clean navigation flow
+* Dedicated history section
+* Professional, product-level UX
+
+---
+
+Implement this in a modular and scalable way.

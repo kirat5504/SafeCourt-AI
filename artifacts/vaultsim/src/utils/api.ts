@@ -77,6 +77,7 @@ export interface VerdictItem {
   summary: string;
   preview: string;
   created_at: string;
+  session_id_hash?: string;
 }
 
 export interface HistoricalDebatesResponse {
@@ -371,10 +372,17 @@ class ApiClient {
     );
   }
 
-  async getVerdicts(): Promise<{ verdicts: VerdictItem[] }> {
+  async getVerdicts(limit = 5): Promise<{ verdicts: VerdictItem[] }> {
     return this.request<{ verdicts: VerdictItem[] }>(
       'GET',
-      '/api/verdicts'
+      `/api/verdicts?limit=${limit}`
+    );
+  }
+
+  async getVerdictById(id: string): Promise<VerdictItem> {
+    return this.request<VerdictItem>(
+      'GET',
+      `/api/verdicts/${id}`
     );
   }
 

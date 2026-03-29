@@ -9,6 +9,8 @@ import { Trial } from './pages/Trial';
 import { VaultPage } from './pages/VaultPage';
 import { AgentPage } from './pages/AgentPage';
 import { TestSecurityVaultPage } from './pages/TestSecurityVaultPage';
+import { History } from './pages/History';
+import { VerdictDetail } from './pages/VerdictDetail';
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
               <Route path="/vault" element={<VaultPage />} />
               <Route path="/agent" element={<AgentPage />} />
               <Route path="/test" element={<TestSecurityVaultPage />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/history/:id" element={<VerdictDetail />} />
             </Routes>
           </MainLayout>
         </SessionProvider>

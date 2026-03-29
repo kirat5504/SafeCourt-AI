@@ -1,5 +1,6 @@
 import hashlib
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import timezone
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session as DBSession
 from ..core.database import get_db
@@ -11,6 +12,17 @@ router = APIRouter()
 class VerdictCreate(BaseModel):
     summary: str
     session_id: str | None = None
+
+
+def _fmt(dt) -> str | None:
+    if dt is None:
+        return None
+    return dt.replace(tzinfo=timezone.utc).isoformat()
+
+
+def _preview(summary: str, n: int = 10) -> str:
+    words = summary.split()
+    return ' '.join(words[:n]) + ('...' if len(words) > n else '')
 
 
 @router.post("/verdicts")
@@ -37,16 +49,37 @@ async def save_verdict(body: VerdictCreate, db: DBSession = Depends(get_db)):
 
 
 @router.get("/verdicts")
-async def get_verdicts(db: DBSession = Depends(get_db)):
-    verdicts = db.query(Verdict).order_by(Verdict.created_at.desc()).limit(10).all()
+async def get_verdicts(
+    limit: int = Query(default=5, le=100),
+    db: DBSession = Depends(get_db),
+):
+    verdicts = (
+        db.query(Verdict)
+        .order_by(Verdict.created_at.desc())
+        .limit(limit)
+        .all()
+    )
     result = []
     for v in verdicts:
-        words = v.summary.split()
-        preview = ' '.join(words[:10]) + ('...' if len(words) > 10 else '')
         result.append({
             "id": str(v.id),
             "summary": v.summary,
-            "preview": preview,
-            "created_at": v.created_at.isoformat() if v.created_at else None,
+            "preview": _preview(v.summary),
+            "created_at": _fmt(v.created_at),
+            "session_id_hash": v.session_id_hash,
         })
     return {"verdicts": result}
+
+
+@router.get("/verdicts/{verdict_id}")
+async def get_verdict(verdict_id: str, db: DBSession = Depends(get_db)):
+    verdict = db.query(Verdict).filter(Verdict.id == verdict_id).first()
+    if not verdict:
+        raise HTTPException(status_code=404, detail="Verdict not found")
+    return {
+        "id": str(verdict.id),
+        "summary": verdict.summary,
+        "preview": _preview(verdict.summary),
+        "created_at": _fmt(verdict.created_at),
+        "session_id_hash": verdict.session_id_hash,
+    }

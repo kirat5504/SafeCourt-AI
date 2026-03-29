@@ -11,6 +11,7 @@ const navItems: NavItem[] = [
   { label: 'SANITISATION', href: '/sanitisation' },
   { label: 'TRIAL',        href: '/trial' },
   { label: 'VAULT',        href: '/vault' },
+  { label: 'HISTORY',      href: '/history' },
   { label: 'AGENT',        href: '/agent', accent: true },
 ];
 
