@@ -1,0 +1,135 @@
+Enhance the **SafeCourt AI system** by implementing a **STRICT INPUT VALIDATION & DEBATE GATEKEEPER** to prevent invalid or incomplete cases from entering the debate pipeline.
+
+---
+
+# 🎯 GOAL
+
+Ensure that:
+
+* Debate ONLY starts when valid legal case input is provided
+* Invalid inputs (e.g., "hey", random text, incomplete cases) are rejected immediately
+* System behaves intelligently and professionally
+
+---
+
+# 🔴 PROBLEM TO FIX
+
+Currently:
+
+* The system starts debate even with meaningless input
+* Agents attempt to respond, leading to poor or nonsensical outputs
+* This breaks realism and UX
+
+---
+
+# ✅ REQUIRED SOLUTION
+
+## 1. INPUT VALIDATION LAYER (MANDATORY)
+
+Before starting debate:
+
+Validate that input contains:
+
+* Clear legal context
+* At least one dispute or claim
+* Parties involved (plaintiff/defendant or equivalent)
+* Some factual content (not empty or trivial text)
+
+---
+
+## 2. INVALID INPUT CONDITIONS
+
+If input is:
+
+* Too short (e.g., < 20–30 words)
+* Generic (e.g., "hey", "hello", random sentence)
+* Lacking legal structure
+* Missing facts or dispute
+
+THEN:
+
+❌ DO NOT start debate
+❌ DO NOT call agents
+
+---
+
+## 3. ERROR RESPONSE (UI BEHAVIOR)
+
+Instead of debate, show a clean error card:
+
+Message:
+
+"Invalid case input. Please provide a complete legal case description including facts, parties, and dispute."
+
+Optional examples:
+
+"Example: A tenant disputes eviction due to unpaid rent despite partial payment..."
+
+---
+
+## 4. BACKEND / LOGIC IMPLEMENTATION
+
+Add validation function:
+
+Example:
+
+* `isValidCase(input: string): boolean`
+
+Checks:
+
+* Length threshold
+* Presence of keywords (dispute, claim, contract, etc.)
+* Sentence complexity (basic heuristic)
+
+---
+
+## 5. FRONTEND INTEGRATION
+
+Before calling debate API:
+
+* Run validation
+* If invalid:
+
+  * Show error UI
+  * Block navigation to courtroom page
+
+---
+
+## 6. OPTIONAL (SMART UPGRADE)
+
+Use LLM-based validation:
+
+Ask model:
+
+"Does this input represent a valid legal case with identifiable facts, parties, and dispute? Answer YES or NO."
+
+If NO → reject input
+
+---
+
+## 7. UX REQUIREMENTS
+
+* Keep message minimal and professional
+* Do NOT show technical errors
+* Do NOT confuse user
+* Maintain premium legal-tech feel
+
+---
+
+## 🚨 IMPORTANT CONSTRAINTS
+
+* Debate MUST NEVER start on invalid input
+* Agents MUST NOT attempt to handle invalid cases
+* Remove any fallback behavior where agents “compensate”
+
+---
+
+## 🎯 END GOAL
+
+* Only meaningful legal cases enter the system
+* Debate remains high-quality and realistic
+* User experience feels intelligent and intentional
+
+---
+
+Apply this validation consistently across the system before triggering any debate logic.

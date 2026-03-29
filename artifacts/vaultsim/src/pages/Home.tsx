@@ -44,10 +44,7 @@ export function Home() {
   };
 
   const handleSubmit = async () => {
-    if (!hasSession) {
-      setError('Please create a session first using the sidebar.');
-      return;
-    }
+    if (!hasSession) return;
     if (!inputText.trim() && !selectedFile) return;
 
     setIsLoading(true);
@@ -145,7 +142,7 @@ export function Home() {
             <input
               type="text"
               value={inputText}
-              onChange={e => setInputText(e.target.value)}
+              onChange={e => { setInputText(e.target.value); if (error) setError(null); }}
               onKeyDown={handleKeyDown}
               placeholder="Type or upload a PDF to sanitise..."
               className="flex-1 bg-transparent outline-none text-sm"
@@ -173,9 +170,27 @@ export function Home() {
         </div>
 
         {error && (
-          <p className="text-sm mb-3 animate-fade-in" style={{ color: '#dc2626' }}>
-            {error}
-          </p>
+          <div
+            className="animate-fade-in mb-4 rounded-2xl px-5 py-4 text-left w-full max-w-2xl mx-auto"
+            style={{ background: '#fff8f8', border: '1px solid #fecaca' }}
+          >
+            <div className="flex items-start gap-3">
+              <span style={{ color: '#dc2626', fontSize: '16px', marginTop: '1px', flexShrink: 0 }}>✕</span>
+              <div>
+                <p className="text-sm font-semibold mb-1" style={{ color: '#b91c1c' }}>
+                  Invalid Case Input
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: '#666666' }}>
+                  {error}
+                </p>
+                <p className="text-xs mt-2 italic" style={{ color: '#aaaaaa' }}>
+                  Example: "Plaintiff Jane Doe alleges breach of employment contract against NexaCorp Ltd, 
+                  claiming wrongful termination and seeking $80,000 in compensatory damages. 
+                  Defendant disputes liability, citing documented performance issues."
+                </p>
+              </div>
+            </div>
+          </div>
         )}
 
         <p

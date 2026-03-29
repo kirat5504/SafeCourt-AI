@@ -15,6 +15,7 @@ from ..models.sanitized_output import SanitizedOutput
 from ..models.debate import Debate
 from ..services.sanitizer import sanitize_text_with_claude, sanitize_pdf_with_gemini
 from ..services.debate import run_security_debate
+from ..services.validator import validate_case_input
 from ..core.claude import get_claude_client, is_claude_available, CLAUDE_MODEL
 
 router = APIRouter()
@@ -50,6 +51,10 @@ async def pipeline_text(
     """Sanitize text then immediately run debate on the sanitized content."""
     session = _get_session(x_session_id, db)
     processing_id = uuid.uuid4()
+
+    is_valid, rejection_reason = validate_case_input(request_body.text)
+    if not is_valid:
+        raise HTTPException(status_code=422, detail=rejection_reason)
 
     try:
         sanitized_text, tokens = sanitize_text_with_claude(request_body.text)
@@ -117,6 +122,10 @@ async def pipeline_pdf(
 
     try:
         sanitized_pdf, tokens, pages, processing_time, claude_calls, extracted_text = sanitize_pdf_with_gemini(pdf_bytes)
+
+        is_valid, rejection_reason = validate_case_input(extracted_text or "")
+        if not is_valid:
+            raise HTTPException(status_code=422, detail=rejection_reason)
 
         output = SanitizedOutput(
             id=uuid.uuid4(),
