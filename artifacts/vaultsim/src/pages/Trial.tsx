@@ -373,7 +373,7 @@ export function Trial() {
                     className="px-5 py-2 rounded-full text-xs font-bold tracking-widest transition-all hover:opacity-80"
                     style={{ background: '#333333', color: 'white', letterSpacing: '0.12em' }}
                   >
-                    {debateItems.length > 0 ? '▶ REPLAY DEBATE' : '▶ START DEBATE'}
+                    ▶ START DEBATE
                   </button>
                 ) : (
                   <p className="text-xs" style={{ color: '#aaaaaa' }}>Create a session to begin.</p>
