@@ -16,6 +16,8 @@ Represented by: Robert T. Haines, Bar No. TX-48821
 SUMMARY OF CLAIMS:
 Plaintiff alleges breach of contract dated January 14, 2024, claiming $175,000 in compensatory damages arising from Defendant's failure to deliver software services as contracted. Defendant's senior engineer, Marcus Webb (Employee ID: NXC-00293), is cited as responsible party.`;
 
+const PROCESSED_KEY = (sessionId: string) => `sc_processed_${sessionId}`;
+
 export function Home() {
   const navigate = useNavigate();
   const { session, isSessionValid } = useSession();
@@ -30,13 +32,22 @@ export function Home() {
 
   const hasSession = session.isActive && isSessionValid();
 
+  const hasProcessed =
+    hasSession &&
+    !!session.id &&
+    localStorage.getItem(PROCESSED_KEY(session.id)) === '1';
+
+  const isLocked = hasProcessed;
+
   const handleDemoCase = () => {
+    if (isLocked) return;
     setInputText(DEMO_CASE);
     setSelectedFile(null);
     setError(null);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isLocked) return;
     const file = e.target.files?.[0] || null;
     if (file) {
       setSelectedFile(file);
@@ -44,7 +55,21 @@ export function Home() {
     }
   };
 
+  const handleAttachClick = () => {
+    if (isLocked) {
+      setErrorTitle('Session In Progress');
+      setError('A session is already in progress. Please end the current session before uploading a new case.');
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
   const handleSubmit = async () => {
+    if (isLocked) {
+      setErrorTitle('Session In Progress');
+      setError('A session is already in progress. Please end the current session before uploading a new case.');
+      return;
+    }
     if (!hasSession) {
       setErrorTitle('Session Required');
       setError('No active session found. Please create a session using the sidebar before submitting a case document.');
@@ -87,6 +112,10 @@ export function Home() {
 
       if (result.token_map && Object.keys(result.token_map).length > 0 && vault && vaultReady) {
         await vault.storeFromTokenMap(result.token_map);
+      }
+
+      if (session.id) {
+        localStorage.setItem(PROCESSED_KEY(session.id), '1');
       }
 
       navigate('/trial', { state: { pipelineResult: result } });
@@ -133,36 +162,62 @@ export function Home() {
         <div className="relative flex items-center w-full max-w-2xl mx-auto mb-3">
           <div
             className="flex items-center w-full rounded-full shadow-sm px-5 py-3.5 gap-3"
-            style={{ background: 'white', border: '1px solid rgba(0,0,0,0.1)' }}
+            style={{
+              background: isLocked ? 'rgba(0,0,0,0.04)' : 'white',
+              border: isLocked ? '1px solid rgba(0,0,0,0.12)' : '1px solid rgba(0,0,0,0.1)',
+              opacity: isLocked ? 0.65 : 1,
+              transition: 'all 0.2s ease',
+              cursor: isLocked ? 'not-allowed' : 'default',
+            }}
           >
             <button
-              onClick={() => fileInputRef.current?.click()}
-              className="shrink-0 hover:opacity-70 transition-opacity"
-              title="Attach PDF"
+              onClick={handleAttachClick}
+              className="shrink-0 transition-opacity"
+              style={{ cursor: isLocked ? 'not-allowed' : 'pointer' }}
+              title={isLocked ? 'End current session to upload a new case' : 'Attach PDF'}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={isLocked ? '#cccccc' : '#999999'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
               </svg>
             </button>
-            <input type="file" ref={fileInputRef} className="hidden" accept=".pdf,.txt" onChange={handleFileSelect} />
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept=".pdf,.txt"
+              onChange={handleFileSelect}
+              disabled={isLocked}
+            />
 
             <input
               type="text"
-              value={inputText}
-              onChange={e => { setInputText(e.target.value); if (error) { setError(null); setErrorTitle('Invalid Case Input'); } }}
+              value={isLocked ? 'Session locked — end session to submit a new case.' : inputText}
+              onChange={e => {
+                if (isLocked) return;
+                setInputText(e.target.value);
+                if (error) { setError(null); setErrorTitle('Invalid Case Input'); }
+              }}
               onKeyDown={handleKeyDown}
               placeholder="Type or upload a PDF to sanitise..."
               className="flex-1 bg-transparent outline-none text-sm"
-              style={{ color: '#333333' }}
-              disabled={isLoading}
+              style={{
+                color: isLocked ? '#aaaaaa' : '#333333',
+                cursor: isLocked ? 'not-allowed' : 'text',
+                fontStyle: isLocked ? 'italic' : 'normal',
+              }}
+              disabled={isLoading || isLocked}
+              readOnly={isLocked}
             />
 
             <button
               onClick={handleSubmit}
-              disabled={isLoading || (!inputText.trim() && !selectedFile)}
+              disabled={isLoading || isLocked || (!inputText.trim() && !selectedFile)}
               className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all disabled:opacity-40"
-              style={{ background: '#111111' }}
-              title="Submit"
+              style={{
+                background: '#111111',
+                cursor: isLocked ? 'not-allowed' : 'pointer',
+              }}
+              title={isLocked ? 'End current session to submit a new case' : 'Submit'}
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -176,7 +231,26 @@ export function Home() {
           </div>
         </div>
 
-        {error && (
+        {isLocked && (
+          <div
+            className="animate-fade-in mb-4 rounded-2xl px-5 py-4 text-left w-full max-w-2xl mx-auto"
+            style={{ background: '#fffbf0', border: '1px solid #f5d58a' }}
+          >
+            <div className="flex items-start gap-3">
+              <span style={{ color: '#c8923a', fontSize: '16px', marginTop: '1px', flexShrink: 0 }}>⚠</span>
+              <div>
+                <p className="text-sm font-semibold mb-1" style={{ color: '#92620a' }}>
+                  Session In Progress
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: '#666666' }}>
+                  A session is already in progress. Please end the current session before uploading a new case.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!isLocked && error && (
           <div
             className="animate-fade-in mb-4 rounded-2xl px-5 py-4 text-left w-full max-w-2xl mx-auto"
             style={{ background: '#fff8f8', border: '1px solid #fecaca' }}
@@ -192,8 +266,8 @@ export function Home() {
                 </p>
                 {errorTitle === 'Invalid Case Input' && (
                   <p className="text-xs mt-2 italic" style={{ color: '#aaaaaa' }}>
-                    Example: "Plaintiff Jane Doe alleges breach of employment contract against NexaCorp Ltd, 
-                    claiming wrongful termination and seeking $80,000 in compensatory damages. 
+                    Example: "Plaintiff Jane Doe alleges breach of employment contract against NexaCorp Ltd,
+                    claiming wrongful termination and seeking $80,000 in compensatory damages.
                     Defendant disputes liability, citing documented performance issues."
                   </p>
                 )}
@@ -211,14 +285,15 @@ export function Home() {
 
         <button
           onClick={handleDemoCase}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold tracking-widest transition-all hover:opacity-80 active:scale-95"
+          disabled={isLocked}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold tracking-widest transition-all hover:opacity-80 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ background: '#111111', color: 'white', letterSpacing: '0.15em' }}
         >
           <span style={{ color: '#c8923a', fontSize: '8px' }}>●</span>
           ADD DEMO CASE
         </button>
 
-        {!hasSession && (
+        {!hasSession && !isLocked && (
           <p
             className="text-xs mt-4 opacity-60"
             style={{ color: '#666666' }}
