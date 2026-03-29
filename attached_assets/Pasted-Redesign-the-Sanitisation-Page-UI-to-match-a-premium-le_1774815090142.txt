@@ -1,0 +1,157 @@
+Redesign the **Sanitisation Page UI** to match a premium legal-tech interface with a clean, structured layout.
+
+Goal:
+Create a **two-panel sanitization interface** with a professional, minimal design (NOT chat-based).
+
+---
+
+### 🧱 Layout Structure
+
+1. Use the same global layout:
+
+* Floating top navbar (already exists)
+* Fixed sidebar (already exists)
+* Background: light beige with subtle grid texture
+
+2. Main Content:
+
+* Centered horizontally
+* Two large panels side-by-side:
+  LEFT → Original Input
+  RIGHT → Sanitized Output
+
+---
+
+### 📌 Top Section
+
+* Small label (top-left of content area):
+  "AWAITING SANITIZATION"
+
+  * Use small uppercase text
+  * Add a small yellow dot indicator
+
+* Top-right:
+  "SESSION ID: <dynamic_id>"
+
+---
+
+### 🧾 LEFT PANEL (Original Input)
+
+Design:
+
+* Black background card
+* Rounded corners (xl)
+* Soft shadow
+* Padding inside
+
+Content:
+
+* Label at top:
+  "ORIGINAL INPUT" (small uppercase, orange accent)
+
+* Text content:
+
+  * White/light gray text
+  * Monospace feel (optional)
+  * Preserve formatting like a document
+
+---
+
+### 🔐 CENTER INDICATOR
+
+Between panels, show:
+
+* Circular dashed loader or animation
+* Label below:
+  "ENCRYPTING"
+
+This should feel like a process indicator.
+
+---
+
+### 📄 RIGHT PANEL (Sanitized Output)
+
+Design:
+
+* Light gray/white card
+* Rounded corners
+* Subtle shadow
+
+Content:
+
+* Label:
+  "SANITIZED OUTPUT" (green accent)
+
+* While loading:
+
+  * Show spinner
+  * Text: "PROCESSING..."
+
+* After response:
+
+  * Replace loader with sanitized text
+
+---
+
+### 🎨 Styling Guidelines
+
+* Maintain consistent spacing and alignment
+* Use soft shadows (not harsh)
+* Rounded UI everywhere (modern SaaS feel)
+* Colors:
+
+  * Background: beige (#f5f2ec)
+  * Accent Yellow: status indicator
+  * Orange: original input label
+  * Green: sanitized output label
+  * Black: input panel
+
+---
+
+### ⚙️ Functional Behavior
+
+* Left panel:
+  Receives input text (from previous page or state)
+
+* On page load or action:
+  Trigger API call to backend (FastAPI sanitization endpoint)
+
+* While waiting:
+  Show:
+
+  * "ENCRYPTING" animation (center)
+  * "PROCESSING..." on right panel
+
+* After response:
+  Display sanitized output in right panel
+
+---
+
+### 🧠 Component Structure
+
+* Sanitisation.tsx (page)
+* InputPanel.tsx
+* OutputPanel.tsx
+* ProcessingIndicator.tsx
+
+---
+
+### 🚨 Important Constraints
+
+* Do NOT use chat UI
+* Do NOT stack elements vertically
+* Must be a clean two-column layout
+* Should feel like a secure system dashboard
+
+---
+
+### ✨ Optional Enhancements
+
+* Smooth fade-in when output appears
+* Subtle animation on loader
+* Slight glow on active panel
+
+---
+
+Goal:
+Make the sanitization experience feel like a **secure, high-end AI processing system**, not a basic form.
