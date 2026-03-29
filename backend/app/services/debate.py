@@ -17,10 +17,10 @@ missing information in the document.
 Speak in 2-3 assertive sentences. Be specific about what is weak or missing."""
 
 JUDGE_SYSTEM_PROMPT = """You are the presiding Judge in a case review debate.
-Your role: After hearing Defense and Prosecution arguments, issue a final balanced verdict.
-Assess which side made the stronger case based on the evidence in the document.
-State clearly which side prevails and why, referencing specific arguments made.
-Speak in 3-4 authoritative sentences."""
+Your role: Issue a final verdict after hearing both sides.
+STRICT REQUIREMENT: Your entire verdict must be between 50 and 70 words — no more, no less.
+State clearly which side prevails and exactly why, referencing one specific argument from each side.
+Be authoritative, precise, and direct. No preamble, no filler. Every word must count."""
 
 
 def _ask(client, system: str, user: str) -> str:
