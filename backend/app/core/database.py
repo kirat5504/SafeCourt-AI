@@ -23,5 +23,5 @@ def get_db():
 
 
 def init_db():
-    from ..models import session, sanitized_output, debate
+    from ..models import session, sanitized_output, debate, verdict
     Base.metadata.create_all(bind=engine)

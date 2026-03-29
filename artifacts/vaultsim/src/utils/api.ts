@@ -72,6 +72,13 @@ export interface DebateResponse {
   masked_content?: string;
 }
 
+export interface VerdictItem {
+  id: string;
+  summary: string;
+  preview: string;
+  created_at: string;
+}
+
 export interface HistoricalDebatesResponse {
   session_id: string;
   debates: {
@@ -350,6 +357,24 @@ class ApiClient {
       'GET',
       `/api/debate/session/${sessionId}`,
       { sessionId }
+    );
+  }
+
+  async saveVerdict(summary: string, sessionId?: string): Promise<{ id: string; saved: boolean }> {
+    return this.request<{ id: string; saved: boolean }>(
+      'POST',
+      '/api/verdicts',
+      {
+        body: { summary, session_id: sessionId ?? null },
+        sessionId,
+      }
+    );
+  }
+
+  async getVerdicts(): Promise<{ verdicts: VerdictItem[] }> {
+    return this.request<{ verdicts: VerdictItem[] }>(
+      'GET',
+      '/api/verdicts'
     );
   }
 

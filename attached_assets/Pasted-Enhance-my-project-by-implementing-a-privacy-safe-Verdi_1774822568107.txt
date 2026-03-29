@@ -1,0 +1,115 @@
+Enhance my project by implementing a **privacy-safe Verdict History system**.
+
+Context:
+My app is a legal AI system where users run a debate (Defense, Prosecution, Judge). Currently, no data is stored after a session ends (privacy-first design). However, I want to store ONLY the final verdict summaries in a safe and minimal way.
+
+---
+
+### 🎯 Goal
+
+Implement a system that:
+
+* Stores ONLY the final verdict (50–70 words)
+* Does NOT store any sensitive data (input text, sanitized text, or debate arguments)
+* Displays saved verdicts in the sidebar
+
+---
+
+### 🔐 Backend (FastAPI + SQLAlchemy + PostgreSQL)
+
+1. Create a new table `verdicts`:
+
+Fields:
+
+* id (primary key)
+* summary (Text, max ~100 words)
+* created_at (timestamp)
+* session_id (optional, hashed or anonymized)
+
+2. Create API endpoints:
+
+POST /verdict
+
+* Input: verdict summary (string)
+* Validate length (50–70 words)
+* Store in database
+
+GET /verdicts
+
+* Return latest verdict summaries (limit 10)
+* Sorted by newest first
+
+3. Ensure:
+
+* No sensitive user input is stored
+* Only final verdict text is saved
+
+---
+
+### ⚛️ Frontend (React + TypeScript + Tailwind)
+
+1. Sidebar Changes:
+
+* Rename "Chat History" → "Verdict History"
+* Replace static text with dynamic list
+
+2. Fetch verdicts:
+
+* On app load or sidebar mount → call GET /verdicts
+* Display list like:
+
+  • Rental dispute resolved
+  • Employment contract issue
+  • Property deposit case
+
+(Short preview of verdict text)
+
+3. Empty State:
+   Show:
+   "No verdicts generated yet. Your case outcomes will appear here."
+
+---
+
+### 🧠 Courtroom Integration
+
+After the debate completes AND after user clicks:
+👉 "Reveal Verdict"
+
+Then:
+
+* Call POST /verdict to store the final verdict
+* Only send the final summary (not full data)
+
+---
+
+### 🔘 Optional (Recommended)
+
+Add a toggle:
+"Save Verdicts Securely"
+
+* If OFF → do not store anything
+* If ON → store verdict summaries
+
+---
+
+### 🎨 UI Guidelines
+
+* Keep sidebar clean and minimal
+* Use small text previews (1–2 lines max)
+* Add subtle hover effect
+* Maintain legal-tech premium aesthetic
+
+---
+
+### 🚨 Important Constraints
+
+* DO NOT store original input
+* DO NOT store sanitized text
+* DO NOT store debate arguments
+* ONLY store final verdict summary
+
+---
+
+### Goal
+
+Create a privacy-first history system that improves UX while maintaining strict data protection, making the product feel realistic and production-ready.

@@ -109,6 +109,15 @@ export function Trial() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [displayedMessages, typingText]);
 
+  useEffect(() => {
+    if (!verdictDone || !judgeItem) return;
+    const saveEnabled = localStorage.getItem('sc_save_verdicts') === 'true';
+    if (!saveEnabled) return;
+    apiClient.saveVerdict(judgeItem.text, session.id ?? undefined).then(() => {
+      window.dispatchEvent(new Event('verdict-saved'));
+    }).catch(() => {});
+  }, [verdictDone]);
+
   const startTyping = useCallback((text: string, onDone: () => void) => {
     const words = text.split(' ');
     let idx = 0;

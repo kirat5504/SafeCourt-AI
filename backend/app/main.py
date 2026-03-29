@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .core.database import init_db, engine
-from .api import auth, health, sanitize, outputs, chat, debate, pipeline
+from .api import auth, health, sanitize, outputs, chat, debate, pipeline, verdicts
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -71,6 +71,7 @@ app.include_router(outputs.router, prefix="/api/sanitize", tags=["outputs"])
 app.include_router(chat.router, prefix="/api", tags=["chat"])
 app.include_router(debate.router, prefix="/api/debate", tags=["debate"])
 app.include_router(pipeline.router, prefix="/api/pipeline", tags=["pipeline"])
+app.include_router(verdicts.router, prefix="/api", tags=["verdicts"])
 
 
 @app.get("/")
