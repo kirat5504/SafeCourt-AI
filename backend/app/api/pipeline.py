@@ -74,6 +74,7 @@ async def pipeline_text(
         transcript, _ = run_security_debate(
             session_id=str(session.id),
             sanitized_text=sanitized_text,
+            token_map=tokens,
         )
 
         debate_record = Debate(
@@ -142,6 +143,7 @@ async def pipeline_pdf(
         transcript, _ = run_security_debate(
             session_id=str(session.id),
             sanitized_text=extracted_text,
+            token_map=tokens,
         )
 
         debate_record = Debate(

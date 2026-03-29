@@ -262,6 +262,7 @@ export function Trial() {
   const currentTypingAgent = phase === 'running' && currentMsgIdx < debateItems.length
     ? debateItems[currentMsgIdx] : null;
   const currentTypingMeta = currentTypingAgent ? (AGENT_META[currentTypingAgent.agent] ?? { label: currentTypingAgent.agent, dotColor: '#888' }) : null;
+  const tokenList = Object.entries(tokenMap).map(([t, o]) => ({ token: t, original: String(o) }));
 
   return (
     <div
@@ -601,6 +602,58 @@ export function Trial() {
             )}
 
             <div ref={bottomRef} />
+          </div>
+        </div>
+
+        <div className="flex flex-col overflow-hidden" style={{ width: '196px', minWidth: '196px' }}>
+          <p
+            className="text-xs font-bold tracking-widest mb-4 pb-2 pt-1"
+            style={{ color: '#aaaaaa', letterSpacing: '0.18em', borderBottom: '1px solid rgba(0,0,0,0.08)' }}
+          >
+            VAULT / DETOKENISED
+          </p>
+
+          <div className="flex-1 overflow-y-auto space-y-3">
+            {(phase === 'idle' || phase === 'fetching') && (
+              <p className="text-xs" style={{ color: '#cccccc', letterSpacing: '0.08em' }}>
+                System Ready
+              </p>
+            )}
+
+            {(phase === 'running' || phase === 'complete' || phase === 'revealed') && (
+              <div
+                className="rounded-xl p-3 animate-fade-in"
+                style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)' }}
+              >
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span style={{ color: '#c8923a', fontSize: '11px' }}>⚠</span>
+                  <span
+                    className="text-xs font-bold tracking-widest"
+                    style={{ color: '#c8923a', letterSpacing: '0.12em', fontSize: '10px' }}
+                  >
+                    VAULT DETOKENIZATION
+                  </span>
+                </div>
+                {tokenList.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {tokenList.map(({ token, original }) => (
+                      <div key={token} className="text-xs">
+                        <span
+                          className="font-mono inline-block rounded px-1 mb-0.5"
+                          style={{ background: '#fef9ee', border: '1px solid #f5e0a0', color: '#b45309', fontSize: '9px' }}
+                        >
+                          {token}
+                        </span>
+                        <br />
+                        <span style={{ color: '#777777', fontSize: '10px' }}>{original}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs" style={{ color: '#aaaaaa' }}>No PII tokens detected.</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

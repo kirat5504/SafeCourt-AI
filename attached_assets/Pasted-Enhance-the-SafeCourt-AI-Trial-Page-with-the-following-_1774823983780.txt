@@ -1,0 +1,140 @@
+Enhance the **SafeCourt AI Trial Page** with the following corrections and improvements:
+
+---
+
+# 🎯 GOALS
+
+1. Restore the **Vault Detokenization panel** (right side)
+2. Keep **Case Digest permanently removed**
+3. Enforce **token-based client references** in all debate outputs
+
+---
+
+# 🟢 PART 1: RESTORE VAULT DETOKENIZATION PANEL
+
+## Requirements
+
+* Re-add the **right-side panel** with:
+  Title: **"VAULT DETOKENIZATION"**
+
+* Content:
+
+  * Display detected tokens and their mapped values (if available)
+  * If no tokens:
+    Show: "No PII tokens detected."
+
+---
+
+## Layout
+
+Maintain 3-column layout:
+
+LEFT → Timeline
+CENTER → Debate Panel
+RIGHT → Vault Detokenization
+
+* Ensure proper spacing and alignment
+* Panel should be visually secondary (lighter background)
+
+---
+
+## Important
+
+* DO NOT reintroduce "Case Digest"
+* Restore only Vault Detokenization functionality
+* Ensure it updates dynamically during debate
+
+---
+
+# 🔵 PART 2: TOKEN-BASED CLIENT REFERENCING (CRITICAL)
+
+## Problem
+
+Agents currently use generic terms like:
+
+* "my client"
+* "the defendant"
+* "the plaintiff"
+
+This breaks consistency with your tokenized system.
+
+---
+
+## Required Behavior
+
+Agents MUST refer to entities using assigned token IDs.
+
+Examples:
+
+* [CLIENT_1]
+* [DEFENDANT_1]
+* [PLAINTIFF_1]
+
+---
+
+## Rules
+
+1. Replace ALL generic references with tokens:
+
+❌ "my client"
+❌ "the defendant"
+❌ "the plaintiff"
+
+✅ "[CLIENT_1]"
+✅ "[DEFENDANT_1]"
+✅ "[PLAINTIFF_1]"
+
+---
+
+2. Consistency
+
+* The SAME token must be used throughout the debate
+* No switching or reassigning
+
+---
+
+3. Prompt Update (VERY IMPORTANT)
+
+Update agent prompts to include:
+
+"Always refer to all parties using their assigned token IDs. Do not use generic terms like 'my client', 'defendant', or 'plaintiff'. Maintain strict token consistency throughout the debate."
+
+---
+
+4. Integration with Sanitization
+
+* Use tokens generated during sanitization step
+* Pass token mapping into debate context
+
+---
+
+# ⚙️ IMPLEMENTATION NOTES
+
+* Ensure tokens are injected into:
+
+  * Defense prompt
+  * Prosecution prompt
+  * Judge prompt
+
+* Maintain readability:
+
+  * Tokens should not clutter text excessively
+  * Keep formatting clean
+
+---
+
+# 🚨 IMPORTANT CONSTRAINTS
+
+* Do NOT bring back Case Digest
+* Do NOT break existing debate flow
+* Do NOT affect typing animation or UI transitions
+* Ensure token system works end-to-end
+
+---
+
+# 🎯 END GOAL
+
+* Vault Detokenization panel is restored and functional
+* Case Digest is removed permanently
+* All agents use consistent token-based references
+* System feels secure, structured, and realistic
