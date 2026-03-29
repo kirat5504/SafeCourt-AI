@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { useSession } from '../contexts/SessionContext';
 import { getApiClient } from '../utils/api';
@@ -65,8 +64,6 @@ export function Trial() {
   const [isSimplified, setIsSimplified]       = useState(false);
   const [simplifiedVerdict, setSimplifiedVerdict] = useState<string | null>(null);
   const [isSimplifying, setIsSimplifying]     = useState(false);
-
-  const [digestTooltip, setDigestTooltip] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const typingRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const bottomRef  = useRef<HTMLDivElement>(null);
@@ -265,8 +262,6 @@ export function Trial() {
   const currentTypingAgent = phase === 'running' && currentMsgIdx < debateItems.length
     ? debateItems[currentMsgIdx] : null;
   const currentTypingMeta = currentTypingAgent ? (AGENT_META[currentTypingAgent.agent] ?? { label: currentTypingAgent.agent, dotColor: '#888' }) : null;
-
-  const tokenList = Object.entries(tokenMap).map(([t, o]) => ({ token: t, original: String(o) }));
 
   return (
     <div
@@ -606,129 +601,6 @@ export function Trial() {
             )}
 
             <div ref={bottomRef} />
-          </div>
-        </div>
-
-        <div className="flex flex-col overflow-hidden" style={{ width: '200px', minWidth: '200px' }}>
-          <p
-            className="text-xs font-bold tracking-widest mb-4 pb-2"
-            style={{ color: '#aaaaaa', letterSpacing: '0.18em', borderBottom: '1px solid rgba(0,0,0,0.08)' }}
-          >
-            VAULT / DETOKENISED
-          </p>
-
-          <div className="flex-1 overflow-y-auto space-y-3">
-            {(phase === 'idle' || phase === 'fetching') && (
-              <p className="text-xs" style={{ color: '#cccccc', letterSpacing: '0.08em' }}>
-                System Ready
-              </p>
-            )}
-
-            {(phase === 'running' || phase === 'complete' || phase === 'revealed') && (
-              <div
-                className="rounded-xl p-3 animate-fade-in"
-                style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)' }}
-              >
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span style={{ color: '#c8923a', fontSize: '11px' }}>⚠</span>
-                  <span
-                    className="text-xs font-bold tracking-widest"
-                    style={{ color: '#c8923a', letterSpacing: '0.12em', fontSize: '10px' }}
-                  >
-                    VAULT DETOKENIZATION
-                  </span>
-                </div>
-                {tokenList.length > 0 ? (
-                  <div className="space-y-1.5">
-                    {tokenList.map(({ token, original }) => (
-                      <div key={token} className="text-xs">
-                        <span
-                          className="font-mono inline-block rounded px-1 mb-0.5"
-                          style={{ background: '#fef9ee', border: '1px solid #f5e0a0', color: '#b45309', fontSize: '9px' }}
-                        >
-                          {token}
-                        </span>
-                        <br />
-                        <span style={{ color: '#777777', fontSize: '10px' }}>{original}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs" style={{ color: '#aaaaaa' }}>No PII tokens detected.</p>
-                )}
-              </div>
-            )}
-
-            {sanitizedText && (phase === 'running' || phase === 'complete' || phase === 'revealed') && (
-              <div
-                className="rounded-xl p-3"
-                style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}
-              >
-                <p
-                  className="text-xs font-bold mb-1.5 tracking-widest"
-                  style={{ color: '#bbbbbb', letterSpacing: '0.12em', fontSize: '10px' }}
-                >
-                  CASE DIGEST
-                  {sanitizedText.length > 0 && (
-                    <span style={{ color: '#c8923a', fontWeight: 400, marginLeft: 6, fontSize: '9px', letterSpacing: '0.05em' }}>
-                      hover to expand
-                    </span>
-                  )}
-                </p>
-                <p
-                  className="text-xs"
-                  style={{
-                    color: '#888888',
-                    fontFamily: 'monospace',
-                    fontSize: '10px',
-                    lineHeight: '1.6',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    cursor: 'default',
-                    paddingBottom: '1px',
-                  }}
-                  onMouseEnter={e => {
-                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                    setDigestTooltip({ top: rect.top, left: rect.left, width: rect.width });
-                  }}
-                  onMouseLeave={() => setDigestTooltip(null)}
-                >
-                  {sanitizedText}
-                </p>
-                {digestTooltip && createPortal(
-                  <div
-                    onMouseLeave={() => setDigestTooltip(null)}
-                    style={{
-                      position: 'fixed',
-                      top: Math.min(digestTooltip.top, window.innerHeight - 200),
-                      left: Math.max(10, Math.min(digestTooltip.left, window.innerWidth - 340)),
-                      width: Math.min(digestTooltip.width + 24, 340),
-                      zIndex: 99999,
-                      background: '#1c1c1c',
-                      color: '#e8e3d8',
-                      borderRadius: '8px',
-                      padding: '10px 12px',
-                      fontSize: '10px',
-                      fontFamily: 'monospace',
-                      lineHeight: '1.65',
-                      boxShadow: '0 6px 24px rgba(0,0,0,0.45)',
-                      border: '1px solid rgba(200,146,58,0.25)',
-                      pointerEvents: 'auto',
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-word',
-                    }}
-                  >
-                    <span style={{ display: 'block', color: '#c8923a', fontWeight: 700, fontSize: '9px', letterSpacing: '0.1em', marginBottom: 6 }}>
-                      FULL CASE DIGEST
-                    </span>
-                    {sanitizedText}
-                  </div>,
-                  document.body
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
