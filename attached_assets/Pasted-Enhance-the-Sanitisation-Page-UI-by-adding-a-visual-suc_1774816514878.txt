@@ -1,0 +1,118 @@
+Enhance the **Sanitisation Page UI** by adding a **visual success indicator (green tick)** when sanitization is completed.
+
+Tech Stack:
+
+* React + TypeScript
+* Tailwind CSS
+
+---
+
+### 🎯 Goal
+
+After the sanitization process is complete:
+
+* Show a **green tick indicator** between the Original Input and Sanitized Output panels
+* Indicate that processing is successful and complete
+
+---
+
+### 🧱 UI Placement
+
+* Position the green tick **centrally between the two panels**
+* It should replace or appear after the loading/processing indicator
+
+Before completion:
+
+* Show:
+
+  * Loader / spinner
+  * Text: "ENCRYPTING" or "PROCESSING..."
+
+After completion:
+
+* Replace loader with:
+
+  * ✅ Green circular tick icon
+
+---
+
+### 🎨 Design Requirements
+
+Green Tick:
+
+* Circular background
+* Color: green (e.g., `bg-green-500`)
+* White checkmark icon inside
+* Slight shadow or glow
+* Smooth appearance (scale/fade animation)
+
+Size:
+
+* Medium (not too large, not too small)
+* Should visually connect both panels
+
+---
+
+### ⚙️ FUNCTIONAL LOGIC
+
+Maintain a state:
+
+* `isSanitizationComplete` (boolean)
+
+Flow:
+
+1. When API call starts:
+   → `isSanitizationComplete = false`
+   → Show loader
+
+2. When API call finishes successfully:
+   → `isSanitizationComplete = true`
+   → Hide loader
+   → Show green tick
+
+---
+
+### ✨ ANIMATION (IMPORTANT)
+
+* Add a smooth transition:
+
+  * Fade in + slight scale up (e.g., `scale-90 → scale-100`)
+* Duration: ~300ms
+
+---
+
+### 🧠 COMPONENT STRUCTURE
+
+Create a reusable component:
+
+`StatusIndicator.tsx`
+
+Behavior:
+
+* If loading → show spinner
+* If complete → show green tick
+
+---
+
+### 🧾 OPTIONAL ENHANCEMENTS
+
+* Add subtle pulse animation to tick (optional)
+* Add small text below:
+  "Sanitization Complete"
+
+---
+
+### 🚨 IMPORTANT
+
+* Do NOT show tick before process completes
+* Must clearly replace loading state
+* Keep UI minimal and clean (no clutter)
+
+---
+
+### 🎯 END GOAL
+
+Create a clear and satisfying visual confirmation that:
+✔ Data has been successfully sanitized
+✔ System is secure and functioning properly
+✔ User can confidently proceed to the next step

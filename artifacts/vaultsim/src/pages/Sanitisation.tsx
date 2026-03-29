@@ -133,7 +133,11 @@ export function Sanitisation() {
         />
 
         <div className="flex items-center justify-center px-2">
-          <ProcessingIndicator active={loading} />
+          <ProcessingIndicator
+            active={loading}
+            complete={status === 'done'}
+            error={status === 'error'}
+          />
         </div>
 
         <OutputPanel
