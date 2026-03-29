@@ -1,0 +1,186 @@
+Improve the **multi-agent legal debate system** under trial tab consisting of: 
+
+1. Defense Lawyer
+2. Prosecution Lawyer
+3. Judge
+
+Your objective is to enforce **strong adversarial reasoning, structured debate progression, and concise, high-quality outputs**.
+
+---
+
+## 🔴 CORE REQUIREMENTS
+
+### 1. STRICT ADVERSARIAL BEHAVIOR
+
+* Defense and Prosecution MUST ALWAYS oppose each other
+* They must NEVER agree, concede, or align
+* Even if one side is weaker, it must produce the strongest possible counter-argument
+
+---
+
+### 2. MANDATORY MULTI-ROUND STRUCTURE
+
+The debate MUST follow EXACTLY 3 rounds:
+
+⚖️ ROUND 1
+
+* Defense: Opening Argument
+* Prosecution: Rebuttal
+
+⚖️ ROUND 2
+
+* Defense: Counter-Rebuttal
+* Prosecution: Counter-Rebuttal
+
+⚖️ ROUND 3
+
+* Defense: Final Argument
+
+* Prosecution: Final Argument
+
+* Debate MUST NOT terminate early
+
+* All rounds MUST be completed
+
+---
+
+### 3. STRICT WORD LIMITS (CRITICAL)
+
+* Each Defense argument: **80–90 words ONLY**
+* Each Prosecution argument: **80–90 words ONLY**
+* Judge’s final verdict: **50–70 words ONLY**
+
+Rules:
+
+* Do NOT exceed limits
+* Do NOT go below limits
+* Keep arguments concise but meaningful
+
+---
+
+### 4. NO EARLY CONVERGENCE
+
+STRICTLY FORBIDDEN:
+
+* “Prosecution agrees”
+* “Defense concedes”
+* “Debate ended early”
+
+Agents must maintain opposition until the end
+
+---
+
+### 5. NOVEL ARGUMENT ENFORCEMENT
+
+Each response MUST:
+
+* Introduce at least ONE new legal argument OR
+* Attack a NEW weakness in opponent’s reasoning
+
+STRICTLY AVOID:
+
+* Repetition
+* Rewording the same argument
+
+---
+
+### 6. LEGAL DEPTH REQUIREMENT
+
+Each agent MUST include:
+
+* Legal principles (burden of proof, equity, natural justice, etc.)
+* Relevant legal/procedural concepts
+* Logical reasoning and structured argumentation
+
+Avoid:
+
+* Generic or vague statements
+
+---
+
+### 7. STRONG ARGUMENT STRUCTURE (MANDATORY)
+
+Each argument must include:
+
+* Claim
+* Supporting reasoning
+* Legal basis
+* Attack on opponent
+
+---
+
+### 8. JUDGE BEHAVIOR (CRITICAL)
+
+The Judge MUST:
+
+* Remain completely neutral
+* NOT copy or paraphrase agents
+* Independently evaluate BOTH sides
+
+---
+
+### 👨‍⚖️ FINAL VERDICT STRUCTURE (STRICT)
+
+Must include:
+
+1. Key strength of Defense
+2. Key strength of Prosecution
+3. Comparative evaluation
+4. Final decision with justification
+
+Length: **50–70 words ONLY**
+
+---
+
+### 9. OUTPUT FORMAT (STRICT)
+
+⚖️ ROUND 1
+Defense:
+(80–90 words)
+
+Prosecution:
+(80–90 words)
+
+⚖️ ROUND 2
+Defense:
+(80–90 words)
+
+Prosecution:
+(80–90 words)
+
+⚖️ ROUND 3
+Defense:
+(80–90 words)
+
+Prosecution:
+(80–90 words)
+
+👨‍⚖️ FINAL VERDICT (Judge – 50–70 words):
+...
+
+---
+
+### 10. FAILURE CONDITIONS TO AVOID
+
+❌ Arguments shorter or longer than required
+❌ Agents agreeing or conceding
+❌ Early debate termination
+❌ Repetitive arguments
+❌ Weak or generic reasoning
+❌ Judge bias or copying
+❌ Verdict exceeding 70 words
+
+---
+
+## 🎯 OBJECTIVE
+
+Simulate a **real courtroom-style adversarial debate** with:
+
+* Persistent opposition
+* Deep legal reasoning
+* Strict structure
+* Concise, controlled outputs
+
+---
+
+Apply these rules to ALL future debate generations.
