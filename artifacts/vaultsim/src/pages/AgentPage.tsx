@@ -28,17 +28,12 @@ export function AgentPage() {
 
   return (
     <div className="max-w-3xl mx-auto animate-fade-in">
-      <div className="mb-8">
-        <h1
-          className="font-black uppercase leading-none mb-2"
-          style={{ fontSize: '2.8rem', color: '#2a2520', letterSpacing: '-0.01em' }}
-        >
-          AGENTS
-        </h1>
-        <p className="text-sm" style={{ color: '#888888' }}>
-          Three autonomous AI agents powered by Claude, each with a distinct legal role.
-        </p>
-      </div>
+      <h1
+        className="font-black uppercase leading-none mb-8"
+        style={{ fontSize: '2.8rem', color: '#2a2520', letterSpacing: '-0.01em' }}
+      >
+        AGENTS
+      </h1>
 
       <div className="space-y-4">
         {agents.map(a => (
