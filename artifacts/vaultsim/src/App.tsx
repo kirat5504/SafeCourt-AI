@@ -1,12 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { SessionProvider } from './contexts/SessionContext';
 import { SecurityProvider } from './contexts/SecurityContext';
-import { AppShell } from './components/layout/AppShell';
+import { MainLayout } from './components/layout/MainLayout';
 
-import { Dashboard } from './pages/Dashboard';
-import { Documents } from './pages/Documents';
-import { Settings } from './pages/Settings';
-import { Debate } from './pages/Debate';
+import { Home } from './pages/Home';
+import { Sanitisation } from './pages/Sanitisation';
+import { Trial } from './pages/Trial';
+import { VaultPage } from './pages/VaultPage';
+import { AgentPage } from './pages/AgentPage';
 import { TestSecurityVaultPage } from './pages/TestSecurityVaultPage';
 
 function App() {
@@ -14,15 +15,16 @@ function App() {
     <Router>
       <SecurityProvider>
         <SessionProvider>
-          <AppShell>
+          <MainLayout>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/documents" element={<Documents />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/debate" element={<Debate />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/sanitisation" element={<Sanitisation />} />
+              <Route path="/trial" element={<Trial />} />
+              <Route path="/vault" element={<VaultPage />} />
+              <Route path="/agent" element={<AgentPage />} />
               <Route path="/test" element={<TestSecurityVaultPage />} />
             </Routes>
-          </AppShell>
+          </MainLayout>
         </SessionProvider>
       </SecurityProvider>
     </Router>

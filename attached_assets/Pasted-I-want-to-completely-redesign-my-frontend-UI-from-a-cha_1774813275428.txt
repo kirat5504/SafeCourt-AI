@@ -1,0 +1,77 @@
+I want to completely redesign my frontend UI from a chat-style layout into a modern, multi-page SaaS interface.
+
+Tech stack:
+
+* React + TypeScript (Vite)
+* Tailwind CSS
+* React Router
+
+Current issue:
+Right now, my UI is a linear chat interface where everything appears stacked vertically. This does not match the product experience I want.
+
+Goal:
+Transform the app into a structured, interactive website with clear navigation and separate pages.
+
+Required Pages:
+
+1. Home Page (Landing / Entry)
+2. Text Sanitization Page
+3. Courtroom Page (AI debate between Defense, Prosecution, Judge)
+
+UI/UX Requirements:
+
+* Use a clean, minimal, premium design (legal-tech aesthetic)
+* Background: light beige/off-white with subtle grid texture
+* Add a floating rounded navbar at the top with navigation tabs:
+  CASE (Home), SANITISATION, TRIAL
+* Add a fixed left sidebar with:
+
+  * "Side Bar" title
+  * Chat history section (empty state UI)
+  * "Create Session" button
+  * Session status display
+
+Home Page Design:
+
+* Centered hero section
+* Large heading: "ENCRYPTED CHAT WITH"
+* Subheading in gold/yellow accent: "MULTI AGENT LEGAL SYSTEM"
+* Rounded input bar with:
+
+  * left icon (attachment)
+  * text input
+  * right send button
+* Small text below: "ENCRYPTED SESSION • VAULTSIM V2.0"
+* CTA button: "ADD DEMO CASE"
+
+Architecture Requirements:
+
+* Use React Router for navigation
+* Create reusable layout components:
+
+  * Navbar
+  * Sidebar
+  * Background grid
+* Use a shared layout wrapper (MainLayout)
+
+Important:
+
+* Do NOT use a chat-style UI
+* Each page should feel like a separate screen
+* Maintain consistent design system across pages
+
+Deliverables:
+
+1. Folder structure for frontend
+2. React components (TypeScript)
+3. Tailwind styling
+4. Routing setup
+5. Clean, modular, production-ready code
+
+Optional (if possible):
+
+* Smooth transitions between pages
+* Hover effects on buttons
+* Subtle shadows and rounded UI (modern SaaS feel)
+
+Make the UI visually similar to a premium product (like Notion, Linear, or Stripe dashboard).
