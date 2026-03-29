@@ -1,0 +1,247 @@
+Redesign and enhance the **Trial (Courtroom) Page UI and interaction** to create a **premium legal-tech simulation experience** with a timeline-based debate flow and a controlled final verdict reveal.
+
+---
+
+### 🎯 Goal
+
+Create a **cinematic, timeline-driven courtroom experience** where:
+
+* Debate unfolds step-by-step (NOT all at once)
+* Messages appear sequentially with **word-by-word typing animation**
+* The system feels like a real legal proceeding
+* The verdict is revealed only after user interaction
+
+---
+
+### 🧱 Layout Structure
+
+Use existing layout:
+
+* Floating top navbar
+* Fixed sidebar
+* Light beige grid background
+
+Main Sections (horizontal layout):
+
+LEFT → Timeline
+CENTER → Debate Panel (Sanitized Channel)
+RIGHT → Vault / Detokenized Panel
+
+---
+
+### ⏱️ TIMELINE (Left Side)
+
+* Vertical timeline with nodes
+
+* Each node represents a step:
+
+  * Start Debate
+  * Defense Argument
+  * Prosecution Argument
+  * Rebuttal (optional)
+  * Final Verdict
+
+* Active step should be visually highlighted (dot/glow)
+
+* Timeline should update dynamically as debate progresses
+
+---
+
+### ⚖️ CENTER PANEL (Debate Area)
+
+Card-style UI:
+
+* Rounded corners
+* Soft shadow
+* Light background
+
+Each message block:
+
+* Header:
+
+  * Role (DEFENSE LAWYER / PROSECUTION LAWYER)
+  * Colored dot (orange for defense, red/blue for prosecution)
+  * Label: "SANITIZED INPUT"
+
+* Body:
+
+  * Text appears **word-by-word (typing animation)**
+
+---
+
+### 🔐 RIGHT PANEL (Vault / Detokenization)
+
+* Light card UI
+* Displays processed/detokenized version
+* Updates alongside debate
+* Slightly less prominent than center panel
+
+---
+
+### ▶️ START BUTTON
+
+Add:
+"Start Debate"
+
+On click:
+
+* Begin timeline progression
+* Trigger sequential rendering of arguments
+
+---
+
+### ⚙️ DEBATE FLOW LOGIC (CRITICAL)
+
+DO NOT render full debate at once.
+
+Flow:
+
+1. User clicks "Start Debate"
+2. Show Defense argument → word-by-word typing
+3. Wait 1–2 seconds
+4. Show Prosecution argument → word-by-word typing
+5. Continue for:
+
+   * Rebuttal (optional)
+
+---
+
+### ⌨️ TYPING ANIMATION
+
+* Split text into words
+* Render one word at a time (30–50ms delay)
+* Should feel like live typing (not instant, not character-by-character)
+
+---
+
+### 🧠 STATE MANAGEMENT
+
+Maintain:
+
+* currentStep (timeline step)
+* isDebateStarted (boolean)
+* displayedText (typing animation)
+* isDebateComplete (boolean)
+* showRevealButton (boolean)
+* showVerdict (boolean)
+
+---
+
+### 🏁 FINAL STATE (After Debate Completes)
+
+After all arguments finish:
+
+#### 1. Timeline Update
+
+* Add new node:
+  "FINAL VERDICT"
+* Include timestamp
+* Highlight as latest step
+
+---
+
+#### 2. Center Panel (System Message)
+
+Display a card:
+
+Header:
+
+* Orange dot
+* Title: "VAULT SYSTEM"
+* Label (right): "SANITISED INPUT"
+
+Body:
+"Debate ended: Prosecution reached final agreement."
+
+Style:
+
+* Light card
+* Rounded corners
+* Soft shadow
+* Center aligned
+
+---
+
+#### 3. Right Panel (Vault)
+
+Display:
+
+Header:
+"VAULT DETOKENIZATION"
+
+Body:
+"No PII tokens detected."
+
+Style:
+
+* Subtle gray card
+* Secondary importance
+
+---
+
+#### 4. Reveal Verdict Button (MANDATORY)
+
+Below system message:
+
+Button:
+"REVEAL VERDICT"
+
+Style:
+
+* Black rounded pill
+* Center aligned
+* Slight glow/shadow
+* Optional icon (shield/lock)
+
+---
+
+### ⚙️ VERDICT REVEAL LOGIC
+
+* DO NOT show verdict automatically
+
+Flow:
+
+* Debate ends → show button
+* On click:
+  → Reveal final verdict (fade-in or typing animation)
+  → Optionally scroll into view
+
+---
+
+### 🎨 UI/UX DETAILS
+
+* Maintain clean spacing and alignment
+* Use subtle shadows and rounded UI
+* Smooth transitions between steps
+* Timeline progresses visually downward
+* Keep typography minimal and readable
+
+---
+
+### 🚨 IMPORTANT CONSTRAINTS
+
+* Do NOT show full debate instantly
+* Must be sequential and animated
+* Must follow timeline progression
+* Verdict must require user interaction
+* Match provided UI screenshots closely
+
+---
+
+### ✨ OPTIONAL ENHANCEMENTS
+
+* Auto-scroll to latest message
+* Blinking cursor during typing
+* Animate timeline nodes appearing
+* Slight delay before final system message (adds realism)
+
+---
+
+### 🎯 END GOAL
+
+Build a **highly interactive, cinematic courtroom simulation** where:
+
+* The user watches arguments unfold step-by-step
+* The system feels intelligent and intentional
+* The verdict becomes a dramatic final reveal
+* The entire experience feels like a polished, production-grade legal AI product
