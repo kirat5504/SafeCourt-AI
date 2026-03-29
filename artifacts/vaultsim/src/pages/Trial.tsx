@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { useSession } from '../contexts/SessionContext';
 import { getApiClient } from '../utils/api';
@@ -64,6 +65,8 @@ export function Trial() {
   const [isSimplified, setIsSimplified]       = useState(false);
   const [simplifiedVerdict, setSimplifiedVerdict] = useState<string | null>(null);
   const [isSimplifying, setIsSimplifying]     = useState(false);
+
+  const [digestTooltip, setDigestTooltip] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const typingRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const bottomRef  = useRef<HTMLDivElement>(null);
@@ -657,13 +660,64 @@ export function Trial() {
                   style={{ color: '#bbbbbb', letterSpacing: '0.12em', fontSize: '10px' }}
                 >
                   CASE DIGEST
+                  {sanitizedText.length > 0 && (
+                    <span style={{ color: '#c8923a', fontWeight: 400, marginLeft: 6, fontSize: '9px', letterSpacing: '0.05em' }}>
+                      hover to expand
+                    </span>
+                  )}
                 </p>
                 <p
-                  className="text-xs leading-relaxed"
-                  style={{ color: '#999999', fontFamily: 'monospace', fontSize: '10px' }}
+                  className="text-xs"
+                  style={{
+                    color: '#888888',
+                    fontFamily: 'monospace',
+                    fontSize: '10px',
+                    lineHeight: '1.6',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    cursor: 'default',
+                    paddingBottom: '1px',
+                  }}
+                  onMouseEnter={e => {
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    setDigestTooltip({ top: rect.top, left: rect.left, width: rect.width });
+                  }}
+                  onMouseLeave={() => setDigestTooltip(null)}
                 >
-                  {sanitizedText.substring(0, 180)}{sanitizedText.length > 180 ? '...' : ''}
+                  {sanitizedText}
                 </p>
+                {digestTooltip && createPortal(
+                  <div
+                    onMouseLeave={() => setDigestTooltip(null)}
+                    style={{
+                      position: 'fixed',
+                      top: Math.min(digestTooltip.top, window.innerHeight - 200),
+                      left: Math.max(10, Math.min(digestTooltip.left, window.innerWidth - 340)),
+                      width: Math.min(digestTooltip.width + 24, 340),
+                      zIndex: 99999,
+                      background: '#1c1c1c',
+                      color: '#e8e3d8',
+                      borderRadius: '8px',
+                      padding: '10px 12px',
+                      fontSize: '10px',
+                      fontFamily: 'monospace',
+                      lineHeight: '1.65',
+                      boxShadow: '0 6px 24px rgba(0,0,0,0.45)',
+                      border: '1px solid rgba(200,146,58,0.25)',
+                      pointerEvents: 'auto',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    <span style={{ display: 'block', color: '#c8923a', fontWeight: 700, fontSize: '9px', letterSpacing: '0.1em', marginBottom: 6 }}>
+                      FULL CASE DIGEST
+                    </span>
+                    {sanitizedText}
+                  </div>,
+                  document.body
+                )}
               </div>
             )}
           </div>
