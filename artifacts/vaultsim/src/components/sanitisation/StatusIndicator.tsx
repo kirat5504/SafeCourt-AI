@@ -87,21 +87,6 @@ export function StatusIndicator({ state }: StatusIndicatorProps) {
         {state === 'idle'     && '· · ·'}
       </p>
 
-      {state === 'complete' && (
-        <p
-          className="text-center leading-tight"
-          style={{
-            color: '#16a34a',
-            fontSize: '9px',
-            letterSpacing: '0.1em',
-            fontWeight: 700,
-            animation: 'si-fade 0.5s ease 0.2s both',
-          }}
-        >
-          SANITIZATION<br />COMPLETE
-        </p>
-      )}
-
       <style>{`
         @keyframes si-spin {
           from { stroke-dashoffset: 0; }
@@ -110,10 +95,6 @@ export function StatusIndicator({ state }: StatusIndicatorProps) {
         @keyframes si-pop {
           from { opacity: 0; transform: scale(0.6); }
           to   { opacity: 1; transform: scale(1); }
-        }
-        @keyframes si-fade {
-          from { opacity: 0; transform: translateY(4px); }
-          to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>
