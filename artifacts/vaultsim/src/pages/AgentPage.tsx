@@ -62,14 +62,6 @@ export function AgentPage() {
           </div>
         ))}
 
-        <div
-          className="rounded-2xl p-5 text-xs"
-          style={{ background: '#f8f6f2', border: '1px solid rgba(0,0,0,0.07)', color: '#888888' }}
-        >
-          <p className="font-bold mb-1" style={{ color: '#555555', letterSpacing: '0.1em' }}>MODEL</p>
-          <p>All agents use <code className="font-mono">claude-haiku-4-5</code> via the Replit AI Integration proxy.
-          Each call includes the full sanitised case document and the prior debate history for continuity.</p>
-        </div>
       </div>
     </div>
   );
