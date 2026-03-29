@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSession } from '../contexts/SessionContext';
 import { getApiClient } from '../utils/api';
+import { GlossaryTooltip } from '../components/trial/GlossaryTooltip';
 
 interface TranscriptItem { agent: string; text: string; }
 
@@ -59,6 +60,10 @@ export function Trial() {
   const [showVerdict, setShowVerdict]     = useState(false);
   const [verdictTyping, setVerdictTyping] = useState('');
   const [verdictDone, setVerdictDone]     = useState(false);
+
+  const [isSimplified, setIsSimplified]       = useState(false);
+  const [simplifiedVerdict, setSimplifiedVerdict] = useState<string | null>(null);
+  const [isSimplifying, setIsSimplifying]     = useState(false);
 
   const typingRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const bottomRef  = useRef<HTMLDivElement>(null);
@@ -160,6 +165,9 @@ export function Trial() {
       setShowVerdict(false);
       setVerdictTyping('');
       setVerdictDone(false);
+      setIsSimplified(false);
+      setSimplifiedVerdict(null);
+      setIsSimplifying(false);
       setTimelineNodes([{ id: 'session', label: 'Trial Session', subLabel: 'Initiate adversarial simulation.', timestamp: getTime(), status: 'done' }]);
       setPhase('running');
     } catch (err: any) {
@@ -176,6 +184,9 @@ export function Trial() {
       setShowVerdict(false);
       setVerdictTyping('');
       setVerdictDone(false);
+      setIsSimplified(false);
+      setSimplifiedVerdict(null);
+      setIsSimplifying(false);
       setTimelineNodes([{ id: 'session', label: 'Trial Session', subLabel: 'Initiate adversarial simulation.', timestamp: getTime(), status: 'done' }]);
       setPhase('running');
     } else {
@@ -213,10 +224,30 @@ export function Trial() {
     setShowVerdict(false);
     setVerdictTyping('');
     setVerdictDone(false);
+    setIsSimplified(false);
+    setSimplifiedVerdict(null);
+    setIsSimplifying(false);
     setTokenMap({});
     setSanitizedText(null);
     setError(null);
     setTimelineNodes([{ id: 'session', label: 'Trial Session', subLabel: 'Initiate adversarial simulation.', status: 'active' }]);
+  };
+
+  const handleToggleSimplify = async () => {
+    if (!judgeItem || !session.id) return;
+    const next = !isSimplified;
+    setIsSimplified(next);
+    if (next && !simplifiedVerdict) {
+      setIsSimplifying(true);
+      try {
+        const res = await apiClient.simplifyVerdict(judgeItem.text, session.id);
+        setSimplifiedVerdict(res.simplified);
+      } catch {
+        setSimplifiedVerdict('Unable to simplify verdict. Please try again.');
+      } finally {
+        setIsSimplifying(false);
+      }
+    }
   };
 
   const currentTypingAgent = phase === 'running' && currentMsgIdx < debateItems.length
@@ -379,7 +410,9 @@ export function Trial() {
                     SANITISED INPUT
                   </span>
                 </div>
-                <p className="text-sm leading-relaxed" style={{ color: '#444444' }}>{msg.text}</p>
+                <p className="text-sm leading-relaxed" style={{ color: '#444444' }}>
+                  <GlossaryTooltip text={msg.text} />
+                </p>
               </div>
             ))}
 
@@ -401,7 +434,7 @@ export function Trial() {
                   </span>
                 </div>
                 <p className="text-sm leading-relaxed" style={{ color: '#444444' }}>
-                  {typingText}
+                  <GlossaryTooltip text={typingText} />
                   <span
                     className="inline-block w-0.5 h-4 ml-0.5 align-middle"
                     style={{ background: currentTypingMeta.dotColor, animation: 'blink 0.8s step-end infinite' }}
@@ -476,17 +509,74 @@ export function Trial() {
                   </div>
                 </div>
                 <div className="h-px mb-4" style={{ background: 'linear-gradient(90deg, rgba(200,146,58,0.4), transparent)' }} />
-                <p className="text-sm leading-relaxed" style={{ color: '#e8e3da' }}>
-                  {verdictTyping}
-                  {!verdictDone && (
-                    <span
-                      className="inline-block w-0.5 h-4 ml-0.5 align-middle"
-                      style={{ background: '#c8923a', animation: 'blink 0.8s step-end infinite' }}
-                    />
-                  )}
-                </p>
+
+                {isSimplified && simplifiedVerdict ? (
+                  <>
+                    <p className="text-sm leading-relaxed" style={{ color: '#e8e3da' }}>
+                      <GlossaryTooltip text={simplifiedVerdict} />
+                    </p>
+                    {verdictDone && (
+                      <p className="text-xs mt-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.25)', fontStyle: 'italic' }}>
+                        Original: <GlossaryTooltip text={judgeItem.text} />
+                      </p>
+                    )}
+                  </>
+                ) : isSimplified && isSimplifying ? (
+                  <div className="flex items-center gap-2 py-1">
+                    <div className="w-3 h-3 rounded-full border border-amber-400/40 border-t-amber-400 animate-spin" />
+                    <span className="text-xs" style={{ color: '#888888' }}>Simplifying verdict…</span>
+                  </div>
+                ) : (
+                  <p className="text-sm leading-relaxed" style={{ color: '#e8e3da' }}>
+                    <GlossaryTooltip text={verdictTyping} />
+                    {!verdictDone && (
+                      <span
+                        className="inline-block w-0.5 h-4 ml-0.5 align-middle"
+                        style={{ background: '#c8923a', animation: 'blink 0.8s step-end infinite' }}
+                      />
+                    )}
+                  </p>
+                )}
+
                 {verdictDone && (
-                  <div className="h-px mt-4" style={{ background: 'linear-gradient(90deg, transparent, rgba(200,146,58,0.4))' }} />
+                  <>
+                    <div className="h-px mt-4" style={{ background: 'linear-gradient(90deg, transparent, rgba(200,146,58,0.4))' }} />
+                    <div className="flex items-center justify-end gap-2.5 mt-3">
+                      <span className="text-xs" style={{ color: '#666666', letterSpacing: '0.08em' }}>
+                        Simplify Verdict
+                      </span>
+                      <button
+                        onClick={handleToggleSimplify}
+                        disabled={isSimplifying}
+                        style={{
+                          width: '36px',
+                          height: '20px',
+                          borderRadius: '10px',
+                          background: isSimplified ? '#c8923a' : 'rgba(255,255,255,0.12)',
+                          border: isSimplified ? 'none' : '1px solid rgba(255,255,255,0.15)',
+                          position: 'relative',
+                          cursor: isSimplifying ? 'wait' : 'pointer',
+                          transition: 'background 0.25s ease',
+                          flexShrink: 0,
+                        }}
+                        title={isSimplified ? 'Show legal language' : 'Show plain English'}
+                      >
+                        <span
+                          style={{
+                            position: 'absolute',
+                            top: '2px',
+                            left: isSimplified ? '18px' : '2px',
+                            width: '16px',
+                            height: '16px',
+                            borderRadius: '50%',
+                            background: 'white',
+                            transition: 'left 0.25s ease',
+                            display: 'block',
+                          }}
+                        />
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             )}

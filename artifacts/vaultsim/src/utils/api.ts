@@ -337,6 +337,14 @@ class ApiClient {
     );
   }
 
+  async simplifyVerdict(text: string, sessionId: string): Promise<{ simplified: string }> {
+    return this.request<{ simplified: string }>(
+      'POST',
+      '/api/pipeline/simplify-verdict',
+      { sessionId, body: { text } }
+    );
+  }
+
   async getHistoricalDebates(sessionId: string): Promise<HistoricalDebatesResponse> {
     return this.request<HistoricalDebatesResponse>(
       'GET',

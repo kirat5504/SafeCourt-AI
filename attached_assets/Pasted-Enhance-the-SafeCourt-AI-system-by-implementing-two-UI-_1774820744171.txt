@@ -1,0 +1,197 @@
+Enhance the **SafeCourt AI** system by implementing two UI/UX features:
+
+A) Simplify Toggle (Final Verdict ONLY)
+B) Hover-based Legal Term Glossary
+
+Tech Stack:
+
+* React + TypeScript (Vite)
+* Tailwind CSS
+
+---
+
+# 🎯 GOAL
+
+Improve usability while maintaining legal authenticity:
+
+* Keep debate in professional legal language
+* Allow users to simplify ONLY the final verdict
+* Help users understand legal terms via hover tooltips
+
+---
+
+# 🔴 FEATURE A: SIMPLIFY TOGGLE (FINAL VERDICT ONLY)
+
+## Functional Requirements
+
+1. Add a toggle switch labeled:
+   **"Simplify Verdict"**
+
+2. Scope:
+
+   * Apply ONLY to the **Final Verdict**
+   * DO NOT modify Defense or Prosecution arguments
+
+---
+
+## Behavior
+
+### When Toggle = OFF (default):
+
+* Show original verdict (legal language)
+
+### When Toggle = ON:
+
+* Replace verdict with simplified version
+* Preserve exact meaning (no distortion)
+
+---
+
+## Simplification Rules
+
+* Convert legal language into plain English
+* Keep meaning identical
+* Use short, clear sentences
+* Avoid jargon and complex phrasing
+
+Examples:
+
+* "prima facie case" → "enough initial evidence"
+* "laches" → "unreasonable delay"
+* "injunctive relief" → "court order to stop an action"
+
+---
+
+## UI Behavior
+
+* When ON:
+
+  * Show simplified verdict as primary text
+  * Optionally show original verdict below in faded/light text
+
+* Add smooth transition (fade or switch)
+
+* Keep layout consistent (no shifting)
+
+---
+
+## Implementation Suggestion
+
+State:
+
+* `isSimplified: boolean`
+
+Logic:
+
+* Store original verdict
+* Generate simplified version (via API or transformation)
+* Toggle between both views
+
+---
+
+# 🔵 FEATURE B: HOVER-BASED LEGAL GLOSSARY
+
+## Functional Requirements
+
+1. Detect and highlight legal terms in:
+
+   * Debate (Defense + Prosecution)
+   * Final Verdict
+
+---
+
+## Terms to Highlight (examples)
+
+* prima facie
+* estoppel
+* laches
+* injunction
+* burden of proof
+* constructive notice
+
+DO NOT highlight:
+
+* common words like court, judge, plaintiff, defendant
+
+---
+
+## Tooltip Behavior
+
+On hover (desktop) or long press (mobile):
+
+Format: <term>
+→ <short meaning>
+
+Examples:
+
+* Prima Facie → Enough evidence at first glance
+* Laches → Delay that weakens a legal claim
+* Estoppel → Prevented from denying a fact
+
+---
+
+## Tooltip Rules
+
+* Max 8–12 words
+* Single line only
+* No paragraphs
+* No examples
+* Instant appear/disappear
+* No delay or animation lag
+
+---
+
+## UI Design
+
+* Highlight terms subtly (underline or dotted underline)
+* Tooltip:
+
+  * Small floating box
+  * Dark or neutral background
+  * Rounded corners
+  * Clean typography
+
+---
+
+## Implementation Suggestion
+
+* Create a dictionary/map:
+  `{ term: definition }`
+
+* Wrap detected terms in:
+  `<span>` with hover behavior
+
+* Build reusable component:
+  `GlossaryTooltip.tsx`
+
+---
+
+# ⚙️ UX CONSTRAINTS
+
+* Keep UI minimal and non-intrusive
+* Do NOT clutter interface
+* Do NOT break reading flow
+* Maintain premium legal-tech aesthetic
+* Ensure responsiveness
+
+---
+
+# 🚨 IMPORTANT CONSTRAINTS
+
+* Simplify toggle must NOT affect debate text
+* Tooltip must be fast and lightweight
+* Avoid over-highlighting text
+* Keep performance optimized
+
+---
+
+# 🎯 END GOAL
+
+* Lawyers see full legal debate unchanged
+* Users can simplify ONLY the final verdict
+* Users understand legal terms instantly via hover
+* UI remains clean, premium, and professional
+
+---
+
+Apply these changes cleanly with modular components and maintainable code.
