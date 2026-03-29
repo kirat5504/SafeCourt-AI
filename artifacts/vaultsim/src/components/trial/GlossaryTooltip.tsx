@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 const LEGAL_GLOSSARY: Record<string, string> = {
   "prima facie": "Enough evidence at first glance to proceed",
@@ -50,26 +51,59 @@ function escapeRegex(str: string) {
 const SORTED_TERMS = Object.keys(LEGAL_GLOSSARY).sort((a, b) => b.length - a.length);
 const TERM_PATTERN = SORTED_TERMS.map(escapeRegex).join('|');
 
+interface TooltipPos {
+  top: number;
+  left: number;
+}
+
 interface TooltipTermProps {
   term: string;
   definition: string;
 }
 
 function TooltipTerm({ term, definition }: TooltipTermProps) {
-  const [visible, setVisible] = useState(false);
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const [pos, setPos] = useState<TooltipPos | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const anchorRef = useRef<HTMLSpanElement>(null);
 
-  const show = (e: React.MouseEvent<HTMLSpanElement> | React.TouchEvent<HTMLSpanElement>) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    setPos({ x: rect.left + rect.width / 2, y: rect.top });
-    setVisible(true);
+  const show = () => {
+    if (!anchorRef.current) return;
+    const rect = anchorRef.current.getBoundingClientRect();
+    setPos({ top: rect.bottom + 6, left: rect.left });
   };
 
-  const hide = () => setVisible(false);
+  const hide = () => setPos(null);
+
+  useEffect(() => {
+    if (!pos || !tooltipRef.current) return;
+    const tip = tooltipRef.current;
+    const tipWidth = tip.offsetWidth;
+    const tipHeight = tip.offsetHeight;
+    const margin = 10;
+
+    let { top, left } = pos;
+
+    if (left + tipWidth + margin > window.innerWidth) {
+      left = window.innerWidth - tipWidth - margin;
+    }
+    if (left < margin) {
+      left = margin;
+    }
+    if (top + tipHeight + margin > window.innerHeight) {
+      const anchorTop = anchorRef.current?.getBoundingClientRect().top ?? top;
+      top = anchorTop - tipHeight - 6;
+    }
+
+    tip.style.left = `${left}px`;
+    tip.style.top = `${top}px`;
+  }, [pos]);
+
+  const label = term.charAt(0).toUpperCase() + term.slice(1).toLowerCase();
 
   return (
     <>
       <span
+        ref={anchorRef}
         onMouseEnter={show}
         onMouseLeave={hide}
         onTouchStart={show}
@@ -82,32 +116,32 @@ function TooltipTerm({ term, definition }: TooltipTermProps) {
       >
         {term}
       </span>
-      {visible && pos && (
-        <span
+
+      {pos && createPortal(
+        <div
+          ref={tooltipRef}
           style={{
             position: 'fixed',
-            left: Math.min(Math.max(pos.x, 90), window.innerWidth - 90),
-            top: pos.y - 10,
-            transform: 'translate(-50%, -100%)',
+            top: pos.top,
+            left: pos.left,
+            zIndex: 99999,
             background: '#1c1c1c',
             color: '#f0ebe3',
             borderRadius: '7px',
             padding: '5px 10px',
             fontSize: '11px',
-            lineHeight: '1.45',
+            lineHeight: '1.5',
             whiteSpace: 'nowrap',
             pointerEvents: 'none',
-            zIndex: 9999,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-            border: '1px solid rgba(200,146,58,0.25)',
+            boxShadow: '0 4px 18px rgba(0,0,0,0.45)',
+            border: '1px solid rgba(200,146,58,0.3)',
           }}
         >
-          <span style={{ color: '#c8923a', fontWeight: 700 }}>
-            {term.charAt(0).toUpperCase() + term.slice(1).toLowerCase()}
-          </span>
+          <span style={{ color: '#c8923a', fontWeight: 700 }}>{label}</span>
           {' \u2192 '}
           {definition}
-        </span>
+        </div>,
+        document.body
       )}
     </>
   );
@@ -130,8 +164,7 @@ export function GlossaryTooltip({ text, style, className }: GlossaryTooltipProps
   for (const match of text.matchAll(regex)) {
     const start = match.index!;
     const matched = match[0];
-    const key = matched.toLowerCase();
-    const definition = LEGAL_GLOSSARY[key];
+    const definition = LEGAL_GLOSSARY[matched.toLowerCase()];
 
     if (start > lastIndex) {
       parts.push(text.slice(lastIndex, start));
