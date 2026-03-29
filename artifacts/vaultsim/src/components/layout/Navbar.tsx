@@ -25,7 +25,10 @@ export function Navbar() {
       >
         <div className="flex items-center gap-1.5 mr-4">
           <span style={{ color: '#888888', fontSize: '14px' }}>✳</span>
-          <span className="font-semibold text-sm" style={{ color: '#333333', letterSpacing: '0.03em' }}>VaultSim</span>
+          <span className="font-semibold text-sm" style={{ letterSpacing: '0.03em' }}>
+            <span style={{ color: '#333333' }}>SafeCourt</span>
+            <span style={{ color: '#c8923a' }}> AI</span>
+          </span>
         </div>
 
         <div className="h-4 w-px mx-1" style={{ background: 'rgba(0,0,0,0.15)' }} />

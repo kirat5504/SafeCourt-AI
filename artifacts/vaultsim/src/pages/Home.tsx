@@ -182,7 +182,7 @@ export function Home() {
           className="text-xs tracking-widest mb-6"
           style={{ color: '#aaaaaa', letterSpacing: '0.18em' }}
         >
-          ENCRYPTED SESSION • VAULTSIM V2.0
+          ENCRYPTED SESSION • SAFECOURT AI · Where legal reasoning meets secure AI
         </p>
 
         <button

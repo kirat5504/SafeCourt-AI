@@ -122,7 +122,7 @@ export function Trial() {
     if (phase !== 'running') return;
     if (currentMsgIdx >= debateItems.length) {
       setTimeout(() => {
-        addTimelineNode({ id: 'vault-system', label: 'Vault System', status: 'active' });
+        addTimelineNode({ id: 'vault-system', label: 'SafeCourt System', status: 'active' });
         setPhase('complete');
       }, 800);
       return;
@@ -418,7 +418,7 @@ export function Trial() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#c8923a' }} />
-                    <span className="text-sm font-bold" style={{ color: '#222222' }}>VAULT SYSTEM</span>
+                    <span className="text-sm font-bold" style={{ color: '#222222' }}>SAFECOURT SYSTEM</span>
                   </div>
                   <span
                     className="text-xs tracking-widest"
@@ -472,7 +472,7 @@ export function Trial() {
                     <p className="text-xs font-black tracking-widest" style={{ color: '#c8923a', letterSpacing: '0.22em' }}>
                       FINAL VERDICT
                     </p>
-                    <p className="text-xs" style={{ color: '#555555' }}>Presiding Judge — VaultSim Court</p>
+                    <p className="text-xs" style={{ color: '#555555' }}>Presiding Judge — SafeCourt AI</p>
                   </div>
                 </div>
                 <div className="h-px mb-4" style={{ background: 'linear-gradient(90deg, rgba(200,146,58,0.4), transparent)' }} />

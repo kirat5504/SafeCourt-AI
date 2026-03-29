@@ -44,7 +44,7 @@ export function AppShell({ children }: AppShellProps) {
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center text-sm text-gray-500">
             <div>
-              © 2024 VaultSim - Privacy-First Tokenization Platform
+              © 2025 SafeCourt AI — Where legal reasoning meets secure AI
             </div>
             <div className="flex space-x-4">
               <span>Status: {isAppHealthy ? '✅ Operational' : '⚠️ Issues Detected'}</span>

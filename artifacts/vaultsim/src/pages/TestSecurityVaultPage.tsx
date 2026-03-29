@@ -292,7 +292,7 @@ export function TestSecurityVaultPage() {
         <div>
           <div style={{ marginBottom: '2rem' }}>
             <h1 style={{ fontSize: '2.25rem', fontWeight: 'bold', color: 'white', marginBottom: '0.5rem' }}>
-              VaultSim Security Test
+              SafeCourt AI Security Test
             </h1>
             <p style={{ color: '#cbd5e1' }}>AES-256-GCM Encrypted Vault & Detokenization System</p>
             <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginTop: '0.5rem' }}>
