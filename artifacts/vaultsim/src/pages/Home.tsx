@@ -24,6 +24,7 @@ export function Home() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorTitle, setErrorTitle] = useState<string>('Invalid Case Input');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -44,11 +45,16 @@ export function Home() {
   };
 
   const handleSubmit = async () => {
-    if (!hasSession) return;
+    if (!hasSession) {
+      setErrorTitle('Session Required');
+      setError('No active session found. Please create a session using the sidebar before submitting a case document.');
+      return;
+    }
     if (!inputText.trim() && !selectedFile) return;
 
     setIsLoading(true);
     setError(null);
+    setErrorTitle('Invalid Case Input');
 
     try {
       let result: any;
@@ -85,6 +91,7 @@ export function Home() {
 
       navigate('/trial', { state: { pipelineResult: result } });
     } catch (err: any) {
+      setErrorTitle('Invalid Case Input');
       setError(err.message || 'Processing failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -142,7 +149,7 @@ export function Home() {
             <input
               type="text"
               value={inputText}
-              onChange={e => { setInputText(e.target.value); if (error) setError(null); }}
+              onChange={e => { setInputText(e.target.value); if (error) { setError(null); setErrorTitle('Invalid Case Input'); } }}
               onKeyDown={handleKeyDown}
               placeholder="Type or upload a PDF to sanitise..."
               className="flex-1 bg-transparent outline-none text-sm"
@@ -178,16 +185,18 @@ export function Home() {
               <span style={{ color: '#dc2626', fontSize: '16px', marginTop: '1px', flexShrink: 0 }}>✕</span>
               <div>
                 <p className="text-sm font-semibold mb-1" style={{ color: '#b91c1c' }}>
-                  Invalid Case Input
+                  {errorTitle}
                 </p>
                 <p className="text-xs leading-relaxed" style={{ color: '#666666' }}>
                   {error}
                 </p>
-                <p className="text-xs mt-2 italic" style={{ color: '#aaaaaa' }}>
-                  Example: "Plaintiff Jane Doe alleges breach of employment contract against NexaCorp Ltd, 
-                  claiming wrongful termination and seeking $80,000 in compensatory damages. 
-                  Defendant disputes liability, citing documented performance issues."
-                </p>
+                {errorTitle === 'Invalid Case Input' && (
+                  <p className="text-xs mt-2 italic" style={{ color: '#aaaaaa' }}>
+                    Example: "Plaintiff Jane Doe alleges breach of employment contract against NexaCorp Ltd, 
+                    claiming wrongful termination and seeking $80,000 in compensatory damages. 
+                    Defendant disputes liability, citing documented performance issues."
+                  </p>
+                )}
               </div>
             </div>
           </div>
