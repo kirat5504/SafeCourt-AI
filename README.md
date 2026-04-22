@@ -62,16 +62,6 @@ PostgreSQL
 
 ---
 
-## Frontend Structure
-
-```text
-artifacts/vaultsim/src/
-├── pages/
-├── components/
-├── contexts/
-├── hooks/
-└── utils/
-```
 
 ### Main Pages
 
@@ -83,53 +73,6 @@ artifacts/vaultsim/src/
 
 ---
 
-## Backend Structure
-
-```text
-backend/app/
-├── api/
-├── services/
-├── models/
-└── core/
-```
-
-### API Endpoints
-
-#### Authentication
-
-* `POST /api/auth/session`
-* `DELETE /api/auth/session`
-
-#### Processing Pipeline
-
-* `POST /api/pipeline/run/text`
-* `POST /api/pipeline/run/pdf`
-* `POST /api/pipeline/simplify-verdict`
-
-#### Verdicts
-
-* `POST /api/verdicts`
-* `GET /api/verdicts`
-* `GET /api/verdicts/{id}`
-
-#### Utility
-
-* `GET /api/health`
-
----
-
-## Database Design
-
-Uses **PostgreSQL** with relational schema.
-
-### Tables
-
-* `sessions` – active sessions and expiry
-* `sanitized_outputs` – anonymised documents
-* `debates` – transcript history
-* `verdicts` – final judgments
-
----
 
 ## Data Flow
 
@@ -199,16 +142,6 @@ cd artifacts/vaultsim
 npm install
 npm run dev
 ```
-
----
-
-## Future Improvements
-
-* Export reports as PDF
-* Legal citation engine
-* Multi-language support
-* Case comparison mode
-* Collaboration workspace
 
 ---
 
